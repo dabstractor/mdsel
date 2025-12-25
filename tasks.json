@@ -4,28 +4,28 @@
       "type": "Phase",
       "id": "P1",
       "title": "Foundation & Core Infrastructure",
-      "status": "Planned",
+      "status": "Complete",
       "description": "Establish project foundation, build Markdown parser integration, and create the semantic tree structure that underlies all selector operations.",
       "milestones": [
         {
           "type": "Milestone",
           "id": "P1.M1",
           "title": "Project Bootstrap",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Initialize TypeScript project with all dependencies, build tooling, and test framework configured.",
           "tasks": [
             {
               "type": "Task",
               "id": "P1.M1.T1",
               "title": "Initialize Node.js/TypeScript Project",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Create package.json, tsconfig.json, and establish project structure with ESM module support.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M1.T1.S1",
                   "title": "Create package.json with dependencies",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [],
                   "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/external_deps.md for dependency versions.\n2. INPUT: None (greenfield).\n3. LOGIC: Create package.json with name 'mdsel', type 'module', bin entry './dist/cli.js', dependencies (unified ^11, remark-parse ^11, remark-gfm ^4, unist-util-visit ^5, commander ^12), devDependencies (typescript ^5.3, tsup ^8, vitest ^1, @types/node ^20).\n4. OUTPUT: /package.json file ready for npm install."
@@ -34,7 +34,7 @@
                   "type": "Subtask",
                   "id": "P1.M1.T1.S2",
                   "title": "Create TypeScript configuration",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M1.T1.S1"
@@ -45,7 +45,7 @@
                   "type": "Subtask",
                   "id": "P1.M1.T1.S3",
                   "title": "Create directory structure",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 0.5,
                   "dependencies": [
                     "P1.M1.T1.S2"
@@ -56,7 +56,7 @@
                   "type": "Subtask",
                   "id": "P1.M1.T1.S4",
                   "title": "Configure build tooling (tsup)",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M1.T1.S3"
@@ -67,7 +67,7 @@
                   "type": "Subtask",
                   "id": "P1.M1.T1.S5",
                   "title": "Configure Vitest test framework",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M1.T1.S4"
@@ -80,14 +80,14 @@
               "type": "Task",
               "id": "P1.M1.T2",
               "title": "Establish Code Quality Tooling",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Configure ESLint and Prettier for consistent code style.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M1.T2.S1",
                   "title": "Configure ESLint for TypeScript",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M1.T1.S5"
@@ -98,7 +98,7 @@
                   "type": "Subtask",
                   "id": "P1.M1.T2.S2",
                   "title": "Configure Prettier",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 0.5,
                   "dependencies": [
                     "P1.M1.T2.S1"
