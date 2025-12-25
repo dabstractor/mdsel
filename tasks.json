@@ -1,0 +1,950 @@
+{
+  "backlog": [
+    {
+      "type": "Phase",
+      "id": "P1",
+      "title": "Foundation & Core Infrastructure",
+      "status": "Planned",
+      "description": "Establish project foundation, build Markdown parser integration, and create the semantic tree structure that underlies all selector operations.",
+      "milestones": [
+        {
+          "type": "Milestone",
+          "id": "P1.M1",
+          "title": "Project Bootstrap",
+          "status": "Planned",
+          "description": "Initialize TypeScript project with all dependencies, build tooling, and test framework configured.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P1.M1.T1",
+              "title": "Initialize Node.js/TypeScript Project",
+              "status": "Planned",
+              "description": "Create package.json, tsconfig.json, and establish project structure with ESM module support.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T1.S1",
+                  "title": "Create package.json with dependencies",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/external_deps.md for dependency versions.\n2. INPUT: None (greenfield).\n3. LOGIC: Create package.json with name 'mdsel', type 'module', bin entry './dist/cli.js', dependencies (unified ^11, remark-parse ^11, remark-gfm ^4, unist-util-visit ^5, commander ^12), devDependencies (typescript ^5.3, tsup ^8, vitest ^1, @types/node ^20).\n4. OUTPUT: /package.json file ready for npm install."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T1.S2",
+                  "title": "Create TypeScript configuration",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M1.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/external_deps.md for TS config requirements.\n2. INPUT: package.json exists from P1.M1.T1.S1.\n3. LOGIC: Create tsconfig.json with target ES2022, module NodeNext, moduleResolution NodeNext, strict true, outDir dist, declaration true. Enable sourceMap for debugging.\n4. OUTPUT: /tsconfig.json configured for ESM Node.js CLI."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T1.S3",
+                  "title": "Create directory structure",
+                  "status": "Planned",
+                  "story_points": 0.5,
+                  "dependencies": [
+                    "P1.M1.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Standard TypeScript CLI project layout.\n2. INPUT: Project root with package.json and tsconfig.json.\n3. LOGIC: Create directories: src/, src/parser/, src/selector/, src/tree/, src/output/, src/cli/, tests/, tests/fixtures/.\n4. OUTPUT: Directory structure ready for source files."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T1.S4",
+                  "title": "Configure build tooling (tsup)",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M1.T1.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: tsup bundles TypeScript for CLI distribution.\n2. INPUT: package.json, tsconfig.json from previous subtasks.\n3. LOGIC: Create tsup.config.ts with entry src/cli/index.ts, format esm, dts true, clean true, target node18. Add build script to package.json.\n4. OUTPUT: /tsup.config.ts, updated package.json scripts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T1.S5",
+                  "title": "Configure Vitest test framework",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M1.T1.S4"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Vitest provides fast TypeScript testing.\n2. INPUT: Project structure from P1.M1.T1.S4.\n3. LOGIC: Create vitest.config.ts with test glob 'tests/**/*.test.ts', coverage provider v8, include src/**. Add test/test:coverage scripts to package.json.\n4. OUTPUT: /vitest.config.ts, updated package.json scripts."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P1.M1.T2",
+              "title": "Establish Code Quality Tooling",
+              "status": "Planned",
+              "description": "Configure ESLint and Prettier for consistent code style.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T2.S1",
+                  "title": "Configure ESLint for TypeScript",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M1.T1.S5"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: TypeScript ESLint with strict rules.\n2. INPUT: Project with TypeScript configured from P1.M1.T1.\n3. LOGIC: Create .eslintrc.json with parser @typescript-eslint/parser, extends ['eslint:recommended', 'plugin:@typescript-eslint/recommended'], rules for strict typing. Add lint script.\n4. OUTPUT: /.eslintrc.json, updated package.json scripts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M1.T2.S2",
+                  "title": "Configure Prettier",
+                  "status": "Planned",
+                  "story_points": 0.5,
+                  "dependencies": [
+                    "P1.M1.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Prettier for code formatting.\n2. INPUT: ESLint configured from P1.M1.T2.S1.\n3. LOGIC: Create .prettierrc with singleQuote true, semi true, tabWidth 2. Add format script to package.json.\n4. OUTPUT: /.prettierrc, updated package.json scripts."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Milestone",
+          "id": "P1.M2",
+          "title": "Markdown Parser Integration",
+          "status": "Planned",
+          "description": "Integrate remark/unified to parse Markdown into mdast AST.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P1.M2.T1",
+              "title": "Implement Markdown Parser Module",
+              "status": "Planned",
+              "description": "Create the core parser that converts Markdown text to mdast AST.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M2.T1.S1",
+                  "title": "Define mdast type definitions",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M1.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/external_deps.md for mdast node types.\n2. INPUT: Project structure from P1.M1.\n3. LOGIC: Create src/types/mdast.ts with interfaces for Root, Heading (depth 1-6), Paragraph, Code (lang, meta, value), List (ordered, children), Table (align, children), Blockquote. Import from @types/mdast if available or define manually.\n4. OUTPUT: /src/types/mdast.ts exporting all node type interfaces."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M2.T1.S2",
+                  "title": "Create unified processor factory",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M2.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/external_deps.md for remark pipeline.\n2. INPUT: Type definitions from P1.M2.T1.S1.\n3. LOGIC: Create src/parser/processor.ts. Import unified, remarkParse, remarkGfm. Export createProcessor() that returns unified().use(remarkParse).use(remarkGfm). Export ParseResult type.\n4. OUTPUT: /src/parser/processor.ts exporting createProcessor function."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M2.T1.S3",
+                  "title": "Implement parseMarkdown function",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M2.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Deterministic parsing is required per PRD.\n2. INPUT: createProcessor() from P1.M2.T1.S2.\n3. LOGIC: Create src/parser/index.ts. Export async parseMarkdown(content: string): Promise<Root>. Use processor.parse() then processor.runSync(). Handle errors gracefully returning ParseError type.\n4. OUTPUT: /src/parser/index.ts exporting parseMarkdown function."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M2.T1.S4",
+                  "title": "Implement parseFile function",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M2.T1.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: File reading with namespace derivation.\n2. INPUT: parseMarkdown from P1.M2.T1.S3.\n3. LOGIC: Create parseFile(filePath: string): Promise<{namespace: string, tree: Root}>. Read file with fs/promises. Derive namespace from path.basename(filePath, '.md'). Call parseMarkdown. Return namespace and tree.\n4. OUTPUT: Updated /src/parser/index.ts exporting parseFile function."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P1.M2.T2",
+              "title": "Create Parser Test Suite",
+              "status": "Planned",
+              "description": "Comprehensive tests for Markdown parsing.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M2.T2.S1",
+                  "title": "Create test fixtures",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M2.T1.S4"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Test all PRD node types.\n2. INPUT: Parser implementation from P1.M2.T1.\n3. LOGIC: Create tests/fixtures/ with: simple.md (headings, paragraphs), code-blocks.md (fenced code with languages), tables.md (GFM tables), lists.md (ordered/unordered), blockquotes.md, mixed.md (all types combined).\n4. OUTPUT: /tests/fixtures/*.md test files."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M2.T2.S2",
+                  "title": "Write parser unit tests",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P1.M2.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Verify deterministic AST output.\n2. INPUT: Fixtures from P1.M2.T2.S1, parseFile from P1.M2.T1.\n3. LOGIC: Create tests/parser.test.ts. Test: headings have correct depth, code blocks preserve lang, tables have rows/cells, lists have items, same input produces same output. Use Vitest describe/it/expect.\n4. OUTPUT: /tests/parser.test.ts with comprehensive coverage."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Milestone",
+          "id": "P1.M3",
+          "title": "Semantic Tree Builder",
+          "status": "Planned",
+          "description": "Transform raw mdast into selector-addressable semantic tree with section virtualization.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P1.M3.T1",
+              "title": "Define Semantic Node Types",
+              "status": "Planned",
+              "description": "Create TypeScript interfaces for semantic tree nodes that support selector addressing.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T1.S1",
+                  "title": "Define SemanticNode interface",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M2.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/selector_grammar.md for node types.\n2. INPUT: mdast types from P1.M2.T1.S1.\n3. LOGIC: Create src/tree/types.ts. Define SemanticNode with: selector (string), type (NodeType enum), originalNode (mdast node reference), parent (SemanticNode | null), children (SemanticNode[]), index (number), wordCount (number).\n4. OUTPUT: /src/tree/types.ts exporting SemanticNode interface."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T1.S2",
+                  "title": "Define NodeType enum and mapping",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M3.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Map mdast types to PRD node types.\n2. INPUT: SemanticNode from P1.M3.T1.S1.\n3. LOGIC: Create NodeType enum: ROOT, HEADING_H1...HEADING_H6, SECTION, BLOCK_PARAGRAPH, BLOCK_LIST, BLOCK_CODE, BLOCK_TABLE, BLOCK_BLOCKQUOTE, PAGE. Create mdastToNodeType(node: mdast.Node): NodeType mapping.\n4. OUTPUT: Updated /src/tree/types.ts with NodeType enum and mapper."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T1.S3",
+                  "title": "Define SemanticTree interface",
+                  "status": "Planned",
+                  "story_points": 0.5,
+                  "dependencies": [
+                    "P1.M3.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Tree contains namespace and root node.\n2. INPUT: SemanticNode from P1.M3.T1.S1.\n3. LOGIC: Create SemanticTree interface with: namespace (string), filePath (string), root (SemanticNode), headings (SemanticNode[]), allNodes (Map<string, SemanticNode> keyed by selector).\n4. OUTPUT: Updated /src/tree/types.ts with SemanticTree interface."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P1.M3.T2",
+              "title": "Implement Tree Builder",
+              "status": "Planned",
+              "description": "Build semantic tree from mdast with selector generation and section virtualization.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T2.S1",
+                  "title": "Implement word counter utility",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M3.T1.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Word count needed for truncation/pagination.\n2. INPUT: mdast node types.\n3. LOGIC: Create src/tree/utils.ts. Implement countWords(node: mdast.Node): number. For text nodes, split on whitespace. For parent nodes, sum children recursively. Handle code blocks by counting value.\n4. OUTPUT: /src/tree/utils.ts exporting countWords function."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T2.S2",
+                  "title": "Implement selector generator",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P1.M3.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/selector_grammar.md for format.\n2. INPUT: SemanticNode types, NodeType enum from P1.M3.T1.\n3. LOGIC: Create src/tree/selector-generator.ts. Implement generateSelector(node: SemanticNode, namespace: string): string. Format: 'namespace::type[index]' for root level, 'parent_selector/type[index]' for nested. Track sibling indices by type.\n4. OUTPUT: /src/tree/selector-generator.ts exporting generateSelector."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T2.S3",
+                  "title": "Implement section virtualizer",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P1.M3.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Section = heading + content until next equal/higher heading.\n2. INPUT: mdast Root, generateSelector from P1.M3.T2.S2.\n3. LOGIC: Create src/tree/section-builder.ts. For each heading, collect following nodes until next heading of depth <= current. Create virtual section node containing heading + collected content. Handle nested sections recursively.\n4. OUTPUT: /src/tree/section-builder.ts exporting buildSections function."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T2.S4",
+                  "title": "Implement buildSemanticTree function",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P1.M3.T2.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Main entry point for tree building.\n2. INPUT: All tree utilities from P1.M3.T2.S1-S3.\n3. LOGIC: Create src/tree/index.ts. Export buildSemanticTree(mdastRoot: Root, namespace: string, filePath: string): SemanticTree. Walk mdast, create SemanticNodes, generate selectors, build sections, populate allNodes map, collect headings array.\n4. OUTPUT: /src/tree/index.ts exporting buildSemanticTree."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P1.M3.T3",
+              "title": "Tree Builder Test Suite",
+              "status": "Planned",
+              "description": "Tests for semantic tree construction and selector generation.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T3.S1",
+                  "title": "Write selector generation tests",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P1.M3.T2.S4"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Selector format must match grammar spec.\n2. INPUT: buildSemanticTree from P1.M3.T2.S4, fixtures from P1.M2.T2.S1.\n3. LOGIC: Create tests/tree.test.ts. Test: root selector is 'ns::root', heading selectors are 'ns::heading:hN[index]', block selectors have correct indices, nested selectors compose with '/'.\n4. OUTPUT: /tests/tree.test.ts with selector generation tests."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P1.M3.T3.S2",
+                  "title": "Write section virtualization tests",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M3.T3.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Sections must correctly scope content.\n2. INPUT: buildSemanticTree, test fixtures.\n3. LOGIC: Add section tests to tests/tree.test.ts. Verify: h2 section contains content until next h2/h1, h3 sections nest within h2, section wordCount sums all descendants.\n4. OUTPUT: Updated /tests/tree.test.ts with section tests."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Phase",
+      "id": "P2",
+      "title": "Selector Engine",
+      "status": "Planned",
+      "description": "Implement the selector parsing, validation, and resolution system that enables declarative content access.",
+      "milestones": [
+        {
+          "type": "Milestone",
+          "id": "P2.M1",
+          "title": "Selector Parser",
+          "status": "Planned",
+          "description": "Parse selector strings into structured AST for resolution.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P2.M1.T1",
+              "title": "Define Selector AST Types",
+              "status": "Planned",
+              "description": "Type definitions for parsed selector components.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M1.T1.S1",
+                  "title": "Define SelectorAST interfaces",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P1.M3.T3.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/selector_grammar.md for grammar.\n2. INPUT: Selector grammar specification.\n3. LOGIC: Create src/selector/types.ts. Define: SelectorAST {namespace?: string, segments: PathSegment[], queryParams: QueryParams}, PathSegment {nodeType: NodeTypeSelector, index: number}, NodeTypeSelector (union of valid types), QueryParams {full?: boolean}.\n4. OUTPUT: /src/selector/types.ts exporting selector AST types."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P2.M1.T2",
+              "title": "Implement Selector Tokenizer",
+              "status": "Planned",
+              "description": "Tokenize selector strings into discrete tokens.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M1.T2.S1",
+                  "title": "Define token types",
+                  "status": "Planned",
+                  "story_points": 0.5,
+                  "dependencies": [
+                    "P2.M1.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Tokens for selector grammar.\n2. INPUT: Selector grammar from plan/architecture/selector_grammar.md.\n3. LOGIC: Create src/selector/tokenizer.ts. Define Token type with: NAMESPACE_SEP (::), PATH_SEP (/), BRACKET_OPEN ([), BRACKET_CLOSE (]), QUERY_START (?), QUERY_SEP (&), EQUALS (=), IDENTIFIER (alphanumeric), NUMBER (digits).\n4. OUTPUT: /src/selector/tokenizer.ts with Token types."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P2.M1.T2.S2",
+                  "title": "Implement tokenize function",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P2.M1.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Must handle all selector syntax.\n2. INPUT: Token types from P2.M1.T2.S1.\n3. LOGIC: Implement tokenize(selector: string): Token[]. Scan character by character, emit tokens. Handle :: as single token, :hN as identifier. Track position for error messages. Throw TokenizeError with position on invalid characters.\n4. OUTPUT: Updated /src/selector/tokenizer.ts with tokenize function."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P2.M1.T3",
+              "title": "Implement Selector Parser",
+              "status": "Planned",
+              "description": "Parse token stream into selector AST.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M1.T3.S1",
+                  "title": "Implement parseSelector function",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P2.M1.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Recursive descent parser for selector grammar.\n2. INPUT: tokenize from P2.M1.T2.S2, SelectorAST types from P2.M1.T1.S1.\n3. LOGIC: Create src/selector/parser.ts. Implement parseSelector(input: string): SelectorAST. Tokenize input, parse namespace (optional ::), parse path segments (type[index]), parse query params (optional ?key=value). Throw ParseError with details.\n4. OUTPUT: /src/selector/parser.ts exporting parseSelector."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P2.M1.T3.S2",
+                  "title": "Implement selector validation",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P2.M1.T3.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Validate node types and heading levels.\n2. INPUT: parseSelector from P2.M1.T3.S1.\n3. LOGIC: Create validateSelector(ast: SelectorAST): ValidationResult. Check: heading levels 1-6, valid block types (paragraph/list/code/table/blockquote), valid query params (only 'full'), non-negative indices.\n4. OUTPUT: Updated /src/selector/parser.ts with validateSelector."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P2.M1.T4",
+              "title": "Selector Parser Tests",
+              "status": "Planned",
+              "description": "Comprehensive tests for selector parsing.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M1.T4.S1",
+                  "title": "Write parser unit tests",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P2.M1.T3.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Cover all selector grammar variants.\n2. INPUT: parseSelector, validateSelector from P2.M1.T3.\n3. LOGIC: Create tests/selector-parser.test.ts. Test valid selectors: 'root', 'heading:h2[0]', 'ns::heading:h1[0]/block:code[0]', 'section[0]?full=true'. Test invalid: 'heading:h7[0]', 'block:invalid[0]', malformed syntax. Verify error messages include position.\n4. OUTPUT: /tests/selector-parser.test.ts."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Milestone",
+          "id": "P2.M2",
+          "title": "Selector Resolver",
+          "status": "Planned",
+          "description": "Resolve parsed selectors against semantic trees to retrieve nodes.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P2.M2.T1",
+              "title": "Implement Selector Resolution",
+              "status": "Planned",
+              "description": "Core resolution logic matching selectors to tree nodes.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M2.T1.S1",
+                  "title": "Define resolution types",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P2.M1.T4.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Resolution can succeed, fail, or partially match.\n2. INPUT: SelectorAST from P2.M1, SemanticTree from P1.M3.\n3. LOGIC: Create src/selector/resolver-types.ts. Define ResolutionResult: {success: boolean, nodes: SemanticNode[], unmatchedPath?: PathSegment[], suggestions?: string[]}. Define ResolverContext for multi-document resolution.\n4. OUTPUT: /src/selector/resolver-types.ts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P2.M2.T1.S2",
+                  "title": "Implement single-tree resolver",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P2.M2.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Walk path segments, match by type and index.\n2. INPUT: ResolutionResult types, SemanticTree from P1.M3.\n3. LOGIC: Create src/selector/resolver.ts. Implement resolveInTree(ast: SelectorAST, tree: SemanticTree): ResolutionResult. For each path segment, find matching children by type and index. Return nodes at final segment. Track unmatched for suggestions.\n4. OUTPUT: /src/selector/resolver.ts exporting resolveInTree."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P2.M2.T1.S3",
+                  "title": "Implement multi-tree resolver",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P2.M2.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Cross-document selection when no namespace.\n2. INPUT: resolveInTree from P2.M2.T1.S2.\n3. LOGIC: Implement resolve(ast: SelectorAST, trees: SemanticTree[]): ResolutionResult. If namespace specified, find matching tree. If no namespace, apply selector to all trees and merge results.\n4. OUTPUT: Updated /src/selector/resolver.ts with resolve function."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P2.M2.T2",
+              "title": "Implement Suggestion Generator",
+              "status": "Planned",
+              "description": "Generate fuzzy suggestions for failed selectors.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M2.T2.S1",
+                  "title": "Implement Levenshtein distance",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P2.M2.T1.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: For fuzzy matching failed selectors.\n2. INPUT: None (utility function).\n3. LOGIC: Create src/selector/levenshtein.ts. Implement levenshteinDistance(a: string, b: string): number using dynamic programming. Export findSimilar(target: string, candidates: string[], maxDistance: number): string[].\n4. OUTPUT: /src/selector/levenshtein.ts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P2.M2.T2.S2",
+                  "title": "Implement suggestion generator",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P2.M2.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: PRD requires bounded fuzzy suggestions.\n2. INPUT: levenshtein from P2.M2.T2.S1, SemanticTree.\n3. LOGIC: Create src/selector/suggestions.ts. Implement generateSuggestions(failedSelector: string, tree: SemanticTree, maxSuggestions: number = 5): string[]. Find similar selectors by Levenshtein distance and prefix matching.\n4. OUTPUT: /src/selector/suggestions.ts."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P2.M2.T3",
+              "title": "Resolver Test Suite",
+              "status": "Planned",
+              "description": "Tests for selector resolution.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P2.M2.T3.S1",
+                  "title": "Write resolver unit tests",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P2.M2.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Test resolution success and failure paths.\n2. INPUT: resolve from P2.M2.T1, fixtures.\n3. LOGIC: Create tests/resolver.test.ts. Test: exact matches return correct nodes, nested paths resolve correctly, missing indices return empty with suggestions, cross-document selection without namespace, suggestions are relevant.\n4. OUTPUT: /tests/resolver.test.ts."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Phase",
+      "id": "P3",
+      "title": "Output & CLI",
+      "status": "Planned",
+      "description": "Implement truncation/pagination, JSON output formatting, and the CLI interface.",
+      "milestones": [
+        {
+          "type": "Milestone",
+          "id": "P3.M1",
+          "title": "Content Extraction & Truncation",
+          "status": "Planned",
+          "description": "Extract content from nodes with truncation and pagination.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P3.M1.T1",
+              "title": "Implement Content Extractor",
+              "status": "Planned",
+              "description": "Extract raw text content from semantic nodes.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M1.T1.S1",
+                  "title": "Implement node-to-text converter",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P2.M2.T3.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: PRD requires raw document text, no transformation.\n2. INPUT: SemanticNode with mdast originalNode reference.\n3. LOGIC: Create src/output/content.ts. Implement nodeToText(node: SemanticNode): string. Walk mdast node, concatenate text content. Preserve code block formatting, list structure, table formatting.\n4. OUTPUT: /src/output/content.ts exporting nodeToText."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M1.T1.S2",
+                  "title": "Implement markdown reconstructor",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M1.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Reconstruct markdown from nodes for output.\n2. INPUT: nodeToText from P3.M1.T1.S1.\n3. LOGIC: Implement nodeToMarkdown(node: SemanticNode): string. For headings add #, for code blocks add fences with lang, for lists add bullets/numbers, for tables reconstruct pipes. Use mdast-util-to-markdown if available.\n4. OUTPUT: Updated /src/output/content.ts with nodeToMarkdown."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P3.M1.T2",
+              "title": "Implement Truncation System",
+              "status": "Planned",
+              "description": "Truncate content exceeding MAX_WORDS threshold.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M1.T2.S1",
+                  "title": "Implement truncation function",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M1.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: PRD specifies mechanical truncation only, no syntactic guarantees.\n2. INPUT: nodeToMarkdown from P3.M1.T1.S2.\n3. LOGIC: Create src/output/truncation.ts. Implement truncate(content: string, maxWords: number): {text: string, truncated: boolean}. Split on whitespace, take first maxWords, append '[truncated]' marker if truncated.\n4. OUTPUT: /src/output/truncation.ts exporting truncate."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M1.T2.S2",
+                  "title": "Implement pagination",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M1.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Large nodes split into virtual pages.\n2. INPUT: truncate from P3.M1.T2.S1.\n3. LOGIC: Implement paginate(content: string, pageSize: number): Page[]. Split content into pages of pageSize words. Each Page has {pageIndex, content, wordCount}. Calculate totalPages. Return array of Pages.\n4. OUTPUT: Updated /src/output/truncation.ts with paginate."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Milestone",
+          "id": "P3.M2",
+          "title": "JSON Output Formatter",
+          "status": "Planned",
+          "description": "Format responses according to output schema.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P3.M2.T1",
+              "title": "Implement Output Types",
+              "status": "Planned",
+              "description": "Define TypeScript interfaces for all output formats.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M2.T1.S1",
+                  "title": "Define output schema types",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M1.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/output_format.md for schema.\n2. INPUT: Output format specification.\n3. LOGIC: Create src/output/types.ts. Define CLIResponse<T>, IndexResponse, DocumentIndex, NodeDescriptor, HeadingDescriptor, BlockSummary, SelectResponse, SelectMatch, ErrorEntry types exactly matching output_format.md.\n4. OUTPUT: /src/output/types.ts exporting all output types."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P3.M2.T2",
+              "title": "Implement Response Formatters",
+              "status": "Planned",
+              "description": "Build response objects for index and select commands.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M2.T2.S1",
+                  "title": "Implement index response formatter",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M2.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Index output shows selector inventory.\n2. INPUT: Output types from P3.M2.T1.S1, SemanticTree from P1.M3.\n3. LOGIC: Create src/output/formatters.ts. Implement formatIndexResponse(trees: SemanticTree[]): CLIResponse<IndexResponse>. Build DocumentIndex for each tree with namespace, headings array, block counts. Calculate summary totals.\n4. OUTPUT: /src/output/formatters.ts exporting formatIndexResponse."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M2.T2.S2",
+                  "title": "Implement select response formatter",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M2.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Select output shows matched content.\n2. INPUT: formatIndexResponse from P3.M2.T2.S1, ResolutionResult from P2.M2.\n3. LOGIC: Implement formatSelectResponse(results: ResolutionResult, options: SelectOptions): CLIResponse<SelectResponse>. Build SelectMatch for each resolved node with content (truncated unless full=true), pagination info, children_available array.\n4. OUTPUT: Updated /src/output/formatters.ts with formatSelectResponse."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M2.T2.S3",
+                  "title": "Implement error response formatter",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M2.T2.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Soft failures with partial results.\n2. INPUT: Output types, error handling patterns.\n3. LOGIC: Implement formatErrorResponse(errors: Error[], partialResults?: any): CLIResponse. Map errors to ErrorEntry objects with type, code, message, suggestions. Include partial_results if some operations succeeded.\n4. OUTPUT: Updated /src/output/formatters.ts with formatErrorResponse."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Milestone",
+          "id": "P3.M3",
+          "title": "CLI Implementation",
+          "status": "Planned",
+          "description": "Implement Commander.js CLI with index and select commands.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P3.M3.T1",
+              "title": "Implement CLI Framework",
+              "status": "Planned",
+              "description": "Set up Commander.js with command structure.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T1.S1",
+                  "title": "Create CLI entry point",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M2.T2.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: See plan/architecture/system_context.md for CLI contract.\n2. INPUT: Commander.js, all formatters from P3.M2.\n3. LOGIC: Create src/cli/index.ts. Import { program } from commander. Set name 'mdsel', version from package.json, description. Add global --json flag (default true). Export program for testing.\n4. OUTPUT: /src/cli/index.ts with base CLI setup."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T1.S2",
+                  "title": "Implement index command",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M3.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: mdsel index <files...>\n2. INPUT: CLI entry from P3.M3.T1.S1, parseFile from P1.M2, buildSemanticTree from P1.M3, formatIndexResponse from P3.M2.\n3. LOGIC: Create src/cli/commands/index.ts. Register 'index <files...>' command. Read each file, parse, build tree. Format and output JSON. Handle file errors gracefully with partial results.\n4. OUTPUT: /src/cli/commands/index.ts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T1.S3",
+                  "title": "Implement select command",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M3.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: mdsel select <selector> [files...]\n2. INPUT: index command pattern, parseSelector from P2.M1, resolve from P2.M2, formatSelectResponse from P3.M2.\n3. LOGIC: Create src/cli/commands/select.ts. Register 'select <selector> [files...]' command. Parse selector, load and parse files, resolve selector, format response. Handle --full flag for bypassing truncation.\n4. OUTPUT: /src/cli/commands/select.ts."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P3.M3.T2",
+              "title": "Implement Exit Codes",
+              "status": "Planned",
+              "description": "Set appropriate exit codes per specification.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T2.S1",
+                  "title": "Implement exit code handler",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M3.T1.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Exit 0 success, 1 error, 2 usage, 4 partial.\n2. INPUT: CLI commands from P3.M3.T1.\n3. LOGIC: Create src/cli/exit.ts. Export setExitCode(response: CLIResponse): void. If success, code 0. If all failed, code 1. If partial_results exist, code 4. Wire into command handlers.\n4. OUTPUT: /src/cli/exit.ts, updated commands."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P3.M3.T3",
+              "title": "CLI Integration Tests",
+              "status": "Planned",
+              "description": "End-to-end tests for CLI commands.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T3.S1",
+                  "title": "Write index command tests",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M3.T2.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Test JSON output matches schema.\n2. INPUT: CLI implementation, test fixtures.\n3. LOGIC: Create tests/cli-index.test.ts. Execute 'mdsel index' via child_process or direct import. Verify JSON output contains namespaces, headings, block counts. Test multiple files, missing files, parse errors.\n4. OUTPUT: /tests/cli-index.test.ts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T3.S2",
+                  "title": "Write select command tests",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P3.M3.T3.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Test selector resolution and content retrieval.\n2. INPUT: CLI implementation, test fixtures.\n3. LOGIC: Create tests/cli-select.test.ts. Test: valid selectors return content, truncation works, --full bypasses truncation, invalid selectors return suggestions, pagination info present for large content.\n4. OUTPUT: /tests/cli-select.test.ts."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P3.M3.T3.S3",
+                  "title": "Write exit code tests",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M3.T3.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Verify exit codes per specification.\n2. INPUT: CLI implementation.\n3. LOGIC: Add exit code tests to CLI test files. Execute CLI commands via child_process, capture exit code. Verify: 0 for success, 1 for complete failure, 4 for partial success.\n4. OUTPUT: Updated /tests/cli-*.test.ts with exit code verification."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "Phase",
+      "id": "P4",
+      "title": "Polish & Release",
+      "status": "Planned",
+      "description": "Final polish, documentation, and release preparation.",
+      "milestones": [
+        {
+          "type": "Milestone",
+          "id": "P4.M1",
+          "title": "Edge Cases & Hardening",
+          "status": "Planned",
+          "description": "Handle edge cases and improve robustness.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P4.M1.T1",
+              "title": "Handle Edge Cases",
+              "status": "Planned",
+              "description": "Ensure robust handling of unusual inputs.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P4.M1.T1.S1",
+                  "title": "Handle empty and malformed files",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P3.M3.T3.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Empty files should produce empty tree, not error.\n2. INPUT: Parser implementation from P1.M2.\n3. LOGIC: Add tests and handling for: empty file, file with only whitespace, file with no headings, file with only code blocks. Ensure valid JSON output in all cases.\n4. OUTPUT: Updated parser with edge case handling, tests."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P4.M1.T1.S2",
+                  "title": "Handle repeated heading titles",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P4.M1.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: PRD says repeated headings disambiguated by ordinal only.\n2. INPUT: Tree builder from P1.M3.\n3. LOGIC: Create test fixture with multiple identical headings. Verify selectors use correct ordinal indices. Ensure 'heading:h2[0]' vs 'heading:h2[1]' correctly select different instances.\n4. OUTPUT: Tests for repeated headings, verified behavior."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P4.M1.T1.S3",
+                  "title": "Handle deeply nested sections",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P4.M1.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: h1 > h2 > h3 > h4 > h5 > h6 nesting.\n2. INPUT: Section builder from P1.M3.\n3. LOGIC: Create test fixture with all heading levels nested. Verify section virtualization at each level. Ensure selectors can address deepest nodes via path composition.\n4. OUTPUT: Tests for deep nesting, verified behavior."
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "Milestone",
+          "id": "P4.M2",
+          "title": "Build & Distribution",
+          "status": "Planned",
+          "description": "Prepare for npm publication.",
+          "tasks": [
+            {
+              "type": "Task",
+              "id": "P4.M2.T1",
+              "title": "Finalize Build Configuration",
+              "status": "Planned",
+              "description": "Ensure clean build for distribution.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P4.M2.T1.S1",
+                  "title": "Configure npm package",
+                  "status": "Planned",
+                  "story_points": 1,
+                  "dependencies": [
+                    "P4.M1.T1.S3"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: npm package with bin entry.\n2. INPUT: package.json, tsup config.\n3. LOGIC: Finalize package.json: set bin.mdsel to './dist/cli.js', files array ['dist'], keywords, repository, license MIT. Add prepublishOnly script to run build and test. Add shebang to CLI entry.\n4. OUTPUT: Updated package.json for npm publish."
+                },
+                {
+                  "type": "Subtask",
+                  "id": "P4.M2.T1.S2",
+                  "title": "Add CLI shebang and permissions",
+                  "status": "Planned",
+                  "story_points": 0.5,
+                  "dependencies": [
+                    "P4.M2.T1.S1"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Node CLI requires shebang.\n2. INPUT: CLI entry point from P3.M3.\n3. LOGIC: Add '#!/usr/bin/env node' as first line of src/cli/index.ts. Configure tsup to preserve shebang in output. Verify built CLI is executable.\n4. OUTPUT: CLI with shebang, executable permissions."
+                }
+              ]
+            },
+            {
+              "type": "Task",
+              "id": "P4.M2.T2",
+              "title": "Create Minimal Documentation",
+              "status": "Planned",
+              "description": "Usage documentation for npm README.",
+              "subtasks": [
+                {
+                  "type": "Subtask",
+                  "id": "P4.M2.T2.S1",
+                  "title": "Write README with usage examples",
+                  "status": "Planned",
+                  "story_points": 2,
+                  "dependencies": [
+                    "P4.M2.T1.S2"
+                  ],
+                  "context_scope": "CONTRACT DEFINITION:\n1. RESEARCH NOTE: Minimal LLM-oriented documentation.\n2. INPUT: CLI implementation, selector grammar from plan/architecture/.\n3. LOGIC: Create README.md with: one-line description, installation (npm install -g mdsel), usage examples for index and select, selector grammar quick reference, example JSON output. Keep concise for LLM consumption.\n4. OUTPUT: /README.md."
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+
