@@ -565,28 +565,28 @@
       "type": "Phase",
       "id": "P3",
       "title": "Output & CLI",
-      "status": "Planned",
+      "status": "Complete",
       "description": "Implement truncation/pagination, JSON output formatting, and the CLI interface.",
       "milestones": [
         {
           "type": "Milestone",
           "id": "P3.M1",
           "title": "Content Extraction & Truncation",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Extract content from nodes with truncation and pagination.",
           "tasks": [
             {
               "type": "Task",
               "id": "P3.M1.T1",
               "title": "Implement Content Extractor",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Extract raw text content from semantic nodes.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M1.T1.S1",
                   "title": "Implement node-to-text converter",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P2.M2.T3.S1"
@@ -597,7 +597,7 @@
                   "type": "Subtask",
                   "id": "P3.M1.T1.S2",
                   "title": "Implement markdown reconstructor",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M1.T1.S1"
@@ -610,14 +610,14 @@
               "type": "Task",
               "id": "P3.M1.T2",
               "title": "Implement Truncation System",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Truncate content exceeding MAX_WORDS threshold.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M1.T2.S1",
                   "title": "Implement truncation function",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M1.T1.S2"
@@ -628,7 +628,7 @@
                   "type": "Subtask",
                   "id": "P3.M1.T2.S2",
                   "title": "Implement pagination",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M1.T2.S1"
