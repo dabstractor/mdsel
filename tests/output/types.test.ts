@@ -280,7 +280,7 @@ describe('Output Types', () => {
 
   describe('HeadingDescriptor', () => {
     it('should accept all heading depths (1-6)', () => {
-      const depths: Array<1 | 2 | 3 | 4 | 5 | 6> = [1, 2, 3, 4, 5, 6];
+      const depths: (1 | 2 | 3 | 4 | 5 | 6)[] = [1, 2, 3, 4, 5, 6];
 
       depths.forEach((depth) => {
         const heading: HeadingDescriptor = {

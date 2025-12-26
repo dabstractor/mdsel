@@ -264,21 +264,21 @@ export class Lexer {
       // Strings
       if (this.currentChar === '"' || this.currentChar === "'") {
         token = this.tokenizeString(start);
-        this.tokens.push(token!);
+        this.tokens.push(token);
         continue;
       }
 
       // Numbers
       if (/[0-9]/.test(this.currentChar)) {
         token = this.tokenizeNumber(start);
-        this.tokens.push(token!);
+        this.tokens.push(token);
         continue;
       }
 
       // Identifiers
       if (/[a-zA-Z_]/.test(this.currentChar)) {
         token = this.tokenizeIdentifier(start);
-        this.tokens.push(token!);
+        this.tokens.push(token);
         continue;
       }
 

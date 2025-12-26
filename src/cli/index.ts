@@ -1,5 +1,8 @@
 import { Command } from 'commander';
 import { createRequire } from 'module';
+import { indexCommand } from './commands/index-command.js';
+import { selectCommand } from './commands/select-command.js';
+import { ExitCode } from './utils/exit-codes.js';
 
 // ESM-compatible way to read package.json
 // Path is relative to the built dist/cli.mjs file
@@ -17,9 +20,13 @@ program
   .command('index')
   .description('Parse documents and emit selector inventory')
   .argument('<files...>', 'Markdown files to index')
-  .action((files: string[]) => {
-    // Placeholder - will be implemented in P1.M2
-    console.log(JSON.stringify({ status: 'not_implemented', files }, null, 2));
+  .action(async (files: string[]) => {
+    try {
+      await indexCommand(files);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      process.exit(ExitCode.ERROR);
+    }
   });
 
 program
@@ -28,9 +35,13 @@ program
   .argument('<selector>', 'Selector string')
   .argument('[files...]', 'Markdown files to search')
   .option('--full', 'Bypass truncation and return full content')
-  .action((selector: string, files: string[], options: { full?: boolean }) => {
-    // Placeholder - will be implemented in P2.M2
-    console.log(JSON.stringify({ status: 'not_implemented', selector, files, options }, null, 2));
+  .action(async (selector: string, files: string[], options: { full?: boolean }) => {
+    try {
+      await selectCommand(selector, files, options);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      process.exit(ExitCode.ERROR);
+    }
   });
 
 program.parse();

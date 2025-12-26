@@ -255,7 +255,7 @@ describe('Repeated Heading Titles', () => {
  * Helper function to extract text content from a heading node.
  */
 function extractHeadingText(heading: any): string {
-  if (!heading || !heading.children || !Array.isArray(heading.children)) {
+  if (!heading?.children || !Array.isArray(heading.children)) {
     return '';
   }
 

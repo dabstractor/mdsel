@@ -887,21 +887,21 @@
           "type": "Milestone",
           "id": "P4.M2",
           "title": "Build & Distribution",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Prepare for npm publication.",
           "tasks": [
             {
               "type": "Task",
               "id": "P4.M2.T1",
               "title": "Finalize Build Configuration",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Ensure clean build for distribution.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P4.M2.T1.S1",
                   "title": "Configure npm package",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P4.M1.T1.S3"
@@ -912,7 +912,7 @@
                   "type": "Subtask",
                   "id": "P4.M2.T1.S2",
                   "title": "Add CLI shebang and permissions",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 0.5,
                   "dependencies": [
                     "P4.M2.T1.S1"
