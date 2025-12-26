@@ -714,21 +714,21 @@
           "type": "Milestone",
           "id": "P3.M3",
           "title": "CLI Implementation",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Implement Commander.js CLI with index and select commands.",
           "tasks": [
             {
               "type": "Task",
               "id": "P3.M3.T1",
               "title": "Implement CLI Framework",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Set up Commander.js with command structure.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M3.T1.S1",
                   "title": "Create CLI entry point",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M2.T2.S3"
@@ -739,7 +739,7 @@
                   "type": "Subtask",
                   "id": "P3.M3.T1.S2",
                   "title": "Implement index command",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M3.T1.S1"
@@ -750,7 +750,7 @@
                   "type": "Subtask",
                   "id": "P3.M3.T1.S3",
                   "title": "Implement select command",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M3.T1.S2"
@@ -763,14 +763,14 @@
               "type": "Task",
               "id": "P3.M3.T2",
               "title": "Implement Exit Codes",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Set appropriate exit codes per specification.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M3.T2.S1",
                   "title": "Implement exit code handler",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M3.T1.S3"
@@ -783,14 +783,14 @@
               "type": "Task",
               "id": "P3.M3.T3",
               "title": "CLI Integration Tests",
-              "status": "Planned",
+              "status": "Complete",
               "description": "End-to-end tests for CLI commands.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M3.T3.S1",
                   "title": "Write index command tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M3.T2.S1"
@@ -801,7 +801,7 @@
                   "type": "Subtask",
                   "id": "P3.M3.T3.S2",
                   "title": "Write select command tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M3.T3.S1"
@@ -812,7 +812,7 @@
                   "type": "Subtask",
                   "id": "P3.M3.T3.S3",
                   "title": "Write exit code tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M3.T3.S2"

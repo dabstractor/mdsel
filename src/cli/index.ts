@@ -1,11 +1,17 @@
 import { Command } from 'commander';
+import { createRequire } from 'module';
+
+// ESM-compatible way to read package.json
+// Path is relative to the built dist/cli.mjs file
+const require = createRequire(import.meta.url);
+const pkg = require('../package.json') as { description: string; version: string };
 
 const program = new Command();
 
 program
   .name('mdsel')
-  .description('Declarative Markdown semantic selection CLI for LLM agents')
-  .version('1.0.0');
+  .description(pkg.description)
+  .version(pkg.version);
 
 program
   .command('index')
