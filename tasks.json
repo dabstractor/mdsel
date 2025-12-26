@@ -206,21 +206,21 @@
           "type": "Milestone",
           "id": "P1.M3",
           "title": "Semantic Tree Builder",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Transform raw mdast into selector-addressable semantic tree with section virtualization.",
           "tasks": [
             {
               "type": "Task",
               "id": "P1.M3.T1",
               "title": "Define Semantic Node Types",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Create TypeScript interfaces for semantic tree nodes that support selector addressing.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M3.T1.S1",
                   "title": "Define SemanticNode interface",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M2.T2.S2"
@@ -231,7 +231,7 @@
                   "type": "Subtask",
                   "id": "P1.M3.T1.S2",
                   "title": "Define NodeType enum and mapping",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M3.T1.S1"
@@ -242,7 +242,7 @@
                   "type": "Subtask",
                   "id": "P1.M3.T1.S3",
                   "title": "Define SemanticTree interface",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 0.5,
                   "dependencies": [
                     "P1.M3.T1.S2"
@@ -255,14 +255,14 @@
               "type": "Task",
               "id": "P1.M3.T2",
               "title": "Implement Tree Builder",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Build semantic tree from mdast with selector generation and section virtualization.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M3.T2.S1",
                   "title": "Implement word counter utility",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M3.T1.S3"
@@ -273,7 +273,7 @@
                   "type": "Subtask",
                   "id": "P1.M3.T2.S2",
                   "title": "Implement selector generator",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P1.M3.T2.S1"
@@ -284,7 +284,7 @@
                   "type": "Subtask",
                   "id": "P1.M3.T2.S3",
                   "title": "Implement section virtualizer",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P1.M3.T2.S2"
@@ -295,7 +295,7 @@
                   "type": "Subtask",
                   "id": "P1.M3.T2.S4",
                   "title": "Implement buildSemanticTree function",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P1.M3.T2.S3"
@@ -308,14 +308,14 @@
               "type": "Task",
               "id": "P1.M3.T3",
               "title": "Tree Builder Test Suite",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Tests for semantic tree construction and selector generation.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M3.T3.S1",
                   "title": "Write selector generation tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P1.M3.T2.S4"
@@ -326,7 +326,7 @@
                   "type": "Subtask",
                   "id": "P1.M3.T3.S2",
                   "title": "Write section virtualization tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M3.T3.S1"
