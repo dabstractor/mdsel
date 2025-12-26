@@ -343,28 +343,28 @@
       "type": "Phase",
       "id": "P2",
       "title": "Selector Engine",
-      "status": "Planned",
+      "status": "Complete",
       "description": "Implement the selector parsing, validation, and resolution system that enables declarative content access.",
       "milestones": [
         {
           "type": "Milestone",
           "id": "P2.M1",
           "title": "Selector Parser",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Parse selector strings into structured AST for resolution.",
           "tasks": [
             {
               "type": "Task",
               "id": "P2.M1.T1",
               "title": "Define Selector AST Types",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Type definitions for parsed selector components.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M1.T1.S1",
                   "title": "Define SelectorAST interfaces",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M3.T3.S2"
@@ -377,14 +377,14 @@
               "type": "Task",
               "id": "P2.M1.T2",
               "title": "Implement Selector Tokenizer",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Tokenize selector strings into discrete tokens.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M1.T2.S1",
                   "title": "Define token types",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 0.5,
                   "dependencies": [
                     "P2.M1.T1.S1"
@@ -395,7 +395,7 @@
                   "type": "Subtask",
                   "id": "P2.M1.T2.S2",
                   "title": "Implement tokenize function",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P2.M1.T2.S1"
@@ -408,14 +408,14 @@
               "type": "Task",
               "id": "P2.M1.T3",
               "title": "Implement Selector Parser",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Parse token stream into selector AST.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M1.T3.S1",
                   "title": "Implement parseSelector function",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P2.M1.T2.S2"
@@ -426,7 +426,7 @@
                   "type": "Subtask",
                   "id": "P2.M1.T3.S2",
                   "title": "Implement selector validation",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P2.M1.T3.S1"
@@ -439,14 +439,14 @@
               "type": "Task",
               "id": "P2.M1.T4",
               "title": "Selector Parser Tests",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Comprehensive tests for selector parsing.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M1.T4.S1",
                   "title": "Write parser unit tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P2.M1.T3.S2"
