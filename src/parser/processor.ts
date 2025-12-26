@@ -26,7 +26,12 @@ export interface MarkdownProcessor {
 export function createProcessor(options: ParserOptions = {}): MarkdownProcessor {
   const { gfm = true } = options;
 
-  const processor = gfm ? unified().use(remarkParse).use(remarkGfm) : unified().use(remarkParse);
+  // Build the processor with all plugins
+  let processor = unified().use(remarkParse);
+
+  if (gfm) {
+    processor = processor.use(remarkGfm);
+  }
 
   return {
     parse: (markdown: string): Root => processor.parse(markdown),

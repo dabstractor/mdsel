@@ -25,6 +25,16 @@ export interface ParserOptions {
    * @default true
    */
   gfm?: boolean;
+  /**
+   * Maximum nesting depth allowed in the document.
+   * @default 20
+   */
+  maxDepth?: number;
+  /**
+   * Maximum file size in bytes.
+   * @default 52428800 (50MB)
+   */
+  maxFileSize?: number;
 }
 
 /**
@@ -40,7 +50,14 @@ export interface ParseResult {
 /**
  * Error codes for parser failures.
  */
-export type ParserErrorCode = 'FILE_NOT_FOUND' | 'FILE_READ_ERROR' | 'PARSE_ERROR';
+export type ParserErrorCode =
+  | 'FILE_NOT_FOUND'
+  | 'FILE_READ_ERROR'
+  | 'PARSE_ERROR'
+  | 'BINARY_FILE'
+  | 'ENCODING_ERROR'
+  | 'DEPTH_EXCEEDED'
+  | 'FILE_TOO_LARGE';
 
 /**
  * Custom error class for parser-related failures.
@@ -48,12 +65,22 @@ export type ParserErrorCode = 'FILE_NOT_FOUND' | 'FILE_READ_ERROR' | 'PARSE_ERRO
 export class ParserError extends Error {
   public readonly code: ParserErrorCode;
   public readonly filePath?: string;
+  public readonly line?: number;
+  public readonly column?: number;
 
-  constructor(code: ParserErrorCode, message: string, filePath?: string) {
+  constructor(
+    code: ParserErrorCode,
+    message: string,
+    filePath?: string,
+    line?: number,
+    column?: number,
+  ) {
     super(message);
     this.name = 'ParserError';
     this.code = code;
     this.filePath = filePath;
+    this.line = line;
+    this.column = column;
     // Maintains proper stack trace in V8 environments (Node.js)
     Error.captureStackTrace(this, ParserError);
   }
