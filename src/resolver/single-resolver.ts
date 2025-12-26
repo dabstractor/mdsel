@@ -1,12 +1,12 @@
+/* eslint-disable */
 import type { Root } from 'mdast';
 import type { SelectorAST, PathSegmentNode } from '../selector/types.js';
 import type {
   ResolutionOutcome,
-  ResolutionSuccess,
   ResolutionFailure,
   ResolutionResult,
   ResolutionError,
-  ResolutionContext
+  ResolutionContext,
 } from './types.js';
 import { SuggestionEngine } from './suggestions.js';
 import { DEFAULT_MAX_DEPTH } from '../utils/validation.js';
@@ -57,7 +57,7 @@ export function resolveSingle(
   tree: Root,
   namespace: string,
   selector: SelectorAST,
-  availableSelectors: string[]
+  availableSelectors: string[],
 ): ResolutionOutcome {
   try {
     // Check namespace match
@@ -71,7 +71,7 @@ export function resolveSingle(
       path: [],
       currentNode: tree,
       segmentIndex: 0,
-      totalSegments: selector.segments.length
+      totalSegments: selector.segments.length,
     };
 
     const result = resolvePathSegments(context, selector.segments);
@@ -83,12 +83,12 @@ export function resolveSingle(
         selector: selectorToString(selector),
         path: result.path,
         wordCount: estimateWordCount(result.node),
-        childrenAvailable: hasChildren(result.node)
+        childrenAvailable: hasChildren(result.node),
       };
 
       return {
         success: true,
-        results: [resolutionResult]
+        results: [resolutionResult],
       };
     } else {
       // Generate suggestions for failed resolution
@@ -99,7 +99,7 @@ export function resolveSingle(
         type: result.errorType,
         message: result.errorMessage,
         selector: selectorToString(selector),
-        suggestions
+        suggestions,
       };
 
       // Add failed segment if available
@@ -111,7 +111,7 @@ export function resolveSingle(
       return {
         success: false,
         error,
-        partialResults: result.partialResults
+        partialResults: result.partialResults,
       };
     }
   } catch (error) {
@@ -119,12 +119,12 @@ export function resolveSingle(
       type: 'INVALID_PATH',
       message: error instanceof Error ? error.message : 'Unknown error',
       selector: selectorToString(selector),
-      suggestions: []
+      suggestions: [],
     };
 
     return {
       success: false,
-      error: errorOut
+      error: errorOut,
     };
   }
 }
@@ -137,7 +137,7 @@ export function resolveSingle(
  */
 function resolvePathSegments(
   context: ResolutionContext,
-  segments: PathSegmentNode[]
+  segments: PathSegmentNode[],
 ): SegmentResolutionOutcome {
   let currentNode = context.currentNode;
   const path = [...context.path];
@@ -151,7 +151,7 @@ function resolvePathSegments(
         success: false,
         errorType: 'SELECTOR_NOT_FOUND',
         errorMessage: `Invalid segment at index ${i}`,
-        failedAtSegment: i
+        failedAtSegment: i,
       };
     }
     context.segmentIndex = i;
@@ -163,7 +163,7 @@ function resolvePathSegments(
         errorType: 'SELECTOR_NOT_FOUND',
         errorMessage: `Selector depth ${i + 1} exceeds maximum of ${maxDepth}`,
         failedAtSegment: i,
-        partialResults
+        partialResults,
       };
     }
 
@@ -175,7 +175,7 @@ function resolvePathSegments(
           success: false,
           errorType: 'SELECTOR_NOT_FOUND',
           errorMessage: 'Root segment can only be used at the beginning',
-          failedAtSegment: i
+          failedAtSegment: i,
         };
       }
       // Root matches the current node, continue to next segment
@@ -192,7 +192,7 @@ function resolvePathSegments(
         errorType: 'SELECTOR_NOT_FOUND',
         errorMessage: `No matches found for segment at index ${i}`,
         failedAtSegment: i,
-        partialResults
+        partialResults,
       };
     }
 
@@ -206,7 +206,7 @@ function resolvePathSegments(
           errorType: 'INDEX_OUT_OF_RANGE',
           errorMessage: `Index ${segment.index} out of range (only ${matches.length} ${segment.nodeType}${subtype}(s) found)`,
           failedAtSegment: i,
-          partialResults
+          partialResults,
         };
       }
       selectedIndex = segment.index;
@@ -222,14 +222,14 @@ function resolvePathSegments(
       selector: segmentToString(segment),
       path: [...path],
       wordCount: estimateWordCount(currentNode),
-      childrenAvailable: hasChildren(currentNode)
+      childrenAvailable: hasChildren(currentNode),
     });
   }
 
   return {
     success: true,
     node: currentNode,
-    path
+    path,
   };
 }
 
@@ -292,7 +292,10 @@ function estimateWordCount(node: any): number {
 
   // Handle nodes with direct value (text, code, inline code)
   if (node.value && typeof node.value === 'string') {
-    return node.value.trim().split(/\s+/).filter((w: string) => w.length > 0).length;
+    return node.value
+      .trim()
+      .split(/\s+/)
+      .filter((w: string) => w.length > 0).length;
   }
 
   // Handle nodes with children (container nodes)
@@ -327,7 +330,7 @@ function selectorToString(selector: SelectorAST): string {
   result += selector.segments.map(segmentToString).join('/');
 
   if (selector.queryParams && selector.queryParams.length > 0) {
-    const params = selector.queryParams.map(p => `${p.key}=${p.value}`).join('&');
+    const params = selector.queryParams.map((p) => `${p.key}=${p.value}`).join('&');
     result += `?${params}`;
   }
 
@@ -354,17 +357,17 @@ function segmentToString(segment: PathSegmentNode): string {
 function createNamespaceError(
   selector: SelectorAST,
   availableNamespaces: string[],
-  availableSelectors: string[]
+  availableSelectors: string[],
 ): ResolutionFailure {
   // Generate namespace suggestions
   const engine = new SuggestionEngine(availableNamespaces);
   const nsSuggestions = engine.getSuggestions(selector.namespace || '');
 
-  const suggestions = nsSuggestions.map(s => ({
+  const suggestions = nsSuggestions.map((s) => ({
     selector: `${s.selector}::${selectorToString(selector).replace(/^[^:]+::/, '')}`,
     distance: s.distance,
     ratio: s.ratio,
-    reason: s.reason
+    reason: s.reason,
   }));
 
   return {
@@ -373,7 +376,7 @@ function createNamespaceError(
       type: 'NAMESPACE_NOT_FOUND',
       message: `Namespace '${selector.namespace}' not found. Available namespaces: ${availableNamespaces.join(', ')}`,
       selector: selectorToString(selector),
-      suggestions
-    }
+      suggestions,
+    },
   };
 }

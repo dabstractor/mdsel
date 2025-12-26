@@ -37,7 +37,7 @@ export function parseSelector(input: string): SelectorAST {
       'EMPTY_SELECTOR',
       'Selector cannot be empty',
       { line: 1, column: 1, offset: 0 },
-      input
+      input,
     );
   }
 
@@ -85,9 +85,9 @@ class Parser {
 
     // Detect trailing slash (if we matched / but got no path segment)
     if (segments.length > 0) {
-      const lastSegment = segments[segments.length - 1];
       // This is handled by the loop - if we match SLASH but then hit EOF or invalid token,
       // the next parsePathSegment() call will error appropriately
+      void segments[segments.length - 1]; // Keep for potential future use
     }
 
     // Parse optional query params
@@ -125,7 +125,10 @@ class Parser {
         throw this.error('INVALID_SYNTAX', `Expected ':' after 'heading'`);
       }
       if (!this.check(TokenType.IDENTIFIER)) {
-        throw this.error('INVALID_HEADING_LEVEL', `Expected heading level (h1-h6) after 'heading:'`);
+        throw this.error(
+          'INVALID_HEADING_LEVEL',
+          `Expected heading level (h1-h6) after 'heading:'`,
+        );
       }
       const levelToken = this.advance();
       const level = levelToken.value as HeadingLevel;
@@ -134,7 +137,7 @@ class Parser {
           'INVALID_HEADING_LEVEL',
           `Invalid heading level '${level}' - must be h1-h6`,
           levelToken.position,
-          this.input
+          this.input,
         );
       }
       subtype = level;
@@ -154,7 +157,7 @@ class Parser {
           'INVALID_BLOCK_TYPE',
           `Invalid block type '${type}' - must be one of: ${validBlockTypes.join(', ')}`,
           typeToken.position,
-          this.input
+          this.input,
         );
       }
       subtype = type;
@@ -168,12 +171,18 @@ class Parser {
         'INVALID_SYNTAX',
         `Unexpected identifier '${this.peek().value}' - expected node type (root, heading, section, block, or page)`,
         this.peek().position,
-        this.input
+        this.input,
       );
     } else if (this.check(TokenType.SLASH) || this.check(TokenType.EOF)) {
-      throw this.error('INVALID_SYNTAX', 'Expected path segment (root, heading, section, block, or page)');
+      throw this.error(
+        'INVALID_SYNTAX',
+        'Expected path segment (root, heading, section, block, or page)',
+      );
     } else {
-      throw this.error('INVALID_SYNTAX', `Expected node type (root, heading, section, block, or page)`);
+      throw this.error(
+        'INVALID_SYNTAX',
+        `Expected node type (root, heading, section, block, or page)`,
+      );
     }
 
     // Parse optional index [number]
@@ -270,7 +279,7 @@ class Parser {
 
   private peekType(offset = 0): TokenType {
     const pos = this.current + offset;
-    return pos < this.tokens.length ? this.tokens[pos]?.type ?? TokenType.EOF : TokenType.EOF;
+    return pos < this.tokens.length ? (this.tokens[pos]?.type ?? TokenType.EOF) : TokenType.EOF;
   }
 
   private match(...types: TokenType[]): boolean {
@@ -291,10 +300,12 @@ class Parser {
   }
 
   private peek(): Token {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.tokens[this.current] ?? this.tokens[this.tokens.length - 1]!;
   }
 
   private previous(): Token {
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.tokens[this.current - 1] ?? this.tokens[0]!;
   }
 

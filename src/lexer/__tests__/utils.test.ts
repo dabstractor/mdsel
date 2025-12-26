@@ -1,4 +1,10 @@
-import { filterTokens, formatTokensForDebug, findTokenAtPosition, getTokenRange, DEFAULT_PARSER_OPTIONS } from '../utils';
+import {
+  filterTokens,
+  formatTokensForDebug,
+  findTokenAtPosition,
+  getTokenRange,
+  DEFAULT_PARSER_OPTIONS,
+} from '../utils';
 import { Token, TokenType, Position } from '../token';
 
 describe('Lexer Utils', () => {
@@ -6,7 +12,7 @@ describe('Lexer Utils', () => {
     type,
     value,
     start: { line, column, offset: 0 },
-    end: { line, column: column + value.length, offset: value.length }
+    end: { line, column: column + value.length, offset: value.length },
   });
 
   describe('filterTokens', () => {
@@ -14,7 +20,7 @@ describe('Lexer Utils', () => {
       const tokens = [
         createToken(TokenType.IDENTIFIER, 'heading', 1, 1),
         createToken(TokenType.WHITESPACE, ' ', 1, 8),
-        createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 9)
+        createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 9),
       ];
 
       const filtered = filterTokens(tokens);
@@ -27,7 +33,7 @@ describe('Lexer Utils', () => {
       const tokens = [
         createToken(TokenType.IDENTIFIER, 'heading', 1, 1),
         createToken(TokenType.WHITESPACE, ' ', 1, 8),
-        createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 9)
+        createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 9),
       ];
 
       const filtered = filterTokens(tokens, { includeWhitespace: true });
@@ -38,7 +44,7 @@ describe('Lexer Utils', () => {
     it('should throw error for error tokens by default', () => {
       const tokens = [
         createToken(TokenType.IDENTIFIER, 'heading', 1, 1),
-        createToken(TokenType.ERROR, 'Unknown character', 1, 8)
+        createToken(TokenType.ERROR, 'Unknown character', 1, 8),
       ];
 
       expect(() => filterTokens(tokens)).toThrow('Unknown character');
@@ -47,7 +53,7 @@ describe('Lexer Utils', () => {
     it('should not throw error when throwOnError is false', () => {
       const tokens = [
         createToken(TokenType.IDENTIFIER, 'heading', 1, 1),
-        createToken(TokenType.ERROR, 'Unknown character', 1, 8)
+        createToken(TokenType.ERROR, 'Unknown character', 1, 8),
       ];
 
       const filtered = filterTokens(tokens, { throwOnError: false });
@@ -61,7 +67,7 @@ describe('Lexer Utils', () => {
       const tokens = [
         createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 1),
         createToken(TokenType.PUNCTUATION, ':', 1, 8),
-        createToken(TokenType.IDENTIFIER, 'h2', 1, 9)
+        createToken(TokenType.IDENTIFIER, 'h2', 1, 9),
       ];
 
       const formatted = formatTokensForDebug(tokens);
@@ -82,7 +88,7 @@ describe('Lexer Utils', () => {
     it('should find token at specific position', () => {
       const tokens = [
         createToken(TokenType.IDENTIFIER, 'heading', 1, 1),
-        createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 9)
+        createToken(TokenType.HEADING_KEYWORD, 'heading', 1, 9),
       ];
 
       const position: Position = { line: 1, column: 5, offset: 4 };
@@ -103,7 +109,7 @@ describe('Lexer Utils', () => {
       const tokens = [
         createToken(TokenType.PUNCTUATION, '(', 1, 1),
         createToken(TokenType.IDENTIFIER, 'test', 1, 2),
-        createToken(TokenType.PUNCTUATION, ')', 1, 6)
+        createToken(TokenType.PUNCTUATION, ')', 1, 6),
       ];
 
       const range = getTokenRange(tokens, TokenType.PUNCTUATION, TokenType.PUNCTUATION);

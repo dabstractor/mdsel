@@ -112,7 +112,7 @@ describe('Lexer', () => {
       const lexer = new Lexer('invalid@token');
       const tokens = lexer.tokenize();
 
-      const errorToken = tokens.find(t => t.type === TokenType.ERROR);
+      const errorToken = tokens.find((t) => t.type === TokenType.ERROR);
       expect(errorToken).toBeDefined();
       expect(errorToken?.value).toContain('@');
       expect(errorToken?.start.column).toBe(8);
@@ -189,7 +189,7 @@ describe('Lexer', () => {
       const lexer = new Lexer('heading:"unclosed');
       const tokens = lexer.tokenize();
 
-      const errorToken = tokens.find(t => t.type === TokenType.ERROR);
+      const errorToken = tokens.find((t) => t.type === TokenType.ERROR);
       expect(errorToken).toBeDefined();
       expect(errorToken?.value).toContain('Unterminated string');
     });

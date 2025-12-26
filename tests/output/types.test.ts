@@ -404,11 +404,7 @@ describe('Output Types', () => {
       const unresolved: UnresolvedSelector = {
         selector: 'readme::heading:h2[99]',
         reason: 'Index out of range: document has 5 h2 headings',
-        suggestions: [
-          'readme::heading:h2[0]',
-          'readme::heading:h2[1]',
-          'readme::heading:h2[2]',
-        ],
+        suggestions: ['readme::heading:h2[0]', 'readme::heading:h2[1]', 'readme::heading:h2[2]'],
       };
 
       expect(unresolved.selector).toBe('readme::heading:h2[99]');

@@ -87,7 +87,7 @@ describe('Binary File Detection', () => {
       expect(result.filePath).toBe(emptyFile);
     });
 
-    it('should parse file with single newline', async () => {
+    it('should parse file with single newline', () => {
       const result = parseMarkdown('\n');
 
       expect(result.ast.type).toBe('root');

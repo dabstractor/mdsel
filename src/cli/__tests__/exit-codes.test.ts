@@ -7,7 +7,9 @@ import { readFileSync } from 'fs';
 const cliPath = join(process.cwd(), 'dist', 'cli.mjs');
 
 // Helper function to run CLI commands and capture exit code
-function runCliCommand(args: string[]): Promise<{ exitCode: number | null, stdout: string, stderr: string }> {
+function runCliCommand(
+  args: string[],
+): Promise<{ exitCode: number | null; stdout: string; stderr: string }> {
   return new Promise((resolve) => {
     const process = spawn('node', [cliPath, ...args], {
       stdio: ['pipe', 'pipe', 'pipe'],
@@ -92,7 +94,7 @@ describe('exit-codes', () => {
       const result = await runCliCommand([
         'index',
         join(fixturesDir, 'simple.md'),
-        join(fixturesDir, 'missing.md')
+        join(fixturesDir, 'missing.md'),
       ]);
 
       expect(result.exitCode).toBe(1);
@@ -108,7 +110,7 @@ describe('exit-codes', () => {
       const result = await runCliCommand([
         'index',
         join(fixturesDir, 'missing1.md'),
-        join(fixturesDir, 'missing2.md')
+        join(fixturesDir, 'missing2.md'),
       ]);
 
       expect(result.exitCode).toBe(1);
@@ -133,8 +135,8 @@ describe('exit-codes', () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
         'select',
-        `${'simple'}::heading:h1[0]`,
-        join(fixturesDir, 'simple.md')
+        `simple::heading:h1[0]`,
+        join(fixturesDir, 'simple.md'),
       ]);
 
       expect(result.exitCode).toBe(0);
@@ -152,7 +154,7 @@ describe('exit-codes', () => {
         'select',
         'heading:h1[0]',
         join(fixturesDir, 'simple.md'),
-        join(fixturesDir, 'complex.md')
+        join(fixturesDir, 'complex.md'),
       ]);
 
       expect(result.exitCode).toBe(0);
@@ -168,7 +170,7 @@ describe('exit-codes', () => {
       const result = await runCliCommand([
         'select',
         'invalid::selector::format',
-        join(fixturesDir, 'simple.md')
+        join(fixturesDir, 'simple.md'),
       ]);
 
       expect(result.exitCode).toBe(1);
@@ -183,8 +185,8 @@ describe('exit-codes', () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
         'select',
-        `${'simple'}::heading:h1[99]`, // Out of range
-        join(fixturesDir, 'simple.md')
+        `simple::heading:h1[99]`, // Out of range
+        join(fixturesDir, 'simple.md'),
       ]);
 
       expect(result.exitCode).toBe(1);
@@ -200,7 +202,7 @@ describe('exit-codes', () => {
       const result = await runCliCommand([
         'select',
         'heading:h1[0]',
-        join(fixturesDir, 'missing.md')
+        join(fixturesDir, 'missing.md'),
       ]);
 
       expect(result.exitCode).toBe(1);
@@ -229,7 +231,7 @@ describe('exit-codes', () => {
         'select',
         'heading:h1[0]',
         join(fixturesDir, 'simple.md'),
-        join(fixturesDir, 'missing.md')
+        join(fixturesDir, 'missing.md'),
       ]);
 
       expect(result.exitCode).toBe(0); // Partial success exits with 0
@@ -246,7 +248,7 @@ describe('exit-codes', () => {
       const result = await runCliCommand([
         'select',
         'heading:h6[0]', // No h6 in fixtures
-        join(fixturesDir, 'simple.md')
+        join(fixturesDir, 'simple.md'),
       ]);
 
       expect(result.exitCode).toBe(1);

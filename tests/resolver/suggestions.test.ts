@@ -42,7 +42,7 @@ describe('SuggestionEngine', () => {
 
       // Should not contain the exact match 'heading:h1[0]'
       // But may contain other similar selectors
-      const hasExactMatch = suggestions.some(s => s.selector.toLowerCase() === 'heading:h1[0]');
+      const hasExactMatch = suggestions.some((s) => s.selector.toLowerCase() === 'heading:h1[0]');
       expect(hasExactMatch).toBe(false);
     });
   });
@@ -60,7 +60,12 @@ describe('SuggestionEngine', () => {
     });
 
     it('should rank by ratio (highest first)', () => {
-      const engine = new SuggestionEngine(['heading:h1[0]', 'heading:h2[0]', 'block:code[0]', 'section[0]']);
+      const engine = new SuggestionEngine([
+        'heading:h1[0]',
+        'heading:h2[0]',
+        'block:code[0]',
+        'section[0]',
+      ]);
       const suggestions = engine.getSuggestions('headng:h1[0]');
 
       // Check that suggestions are sorted by ratio descending
@@ -122,7 +127,7 @@ describe('SuggestionEngine', () => {
         'heading:h2[0]',
         'heading:h2[1]',
         'heading:h3[0]',
-        'block:code[0]'
+        'block:code[0]',
       ];
       const engine = new SuggestionEngine(candidates);
 
@@ -140,7 +145,7 @@ describe('SuggestionEngine', () => {
         'heading:h2[0]',
         'heading:h2[1]',
         'heading:h3[0]',
-        'heading:h3[1]'
+        'heading:h3[1]',
       ]);
 
       const suggestions = engine.getSuggestions('hea');
@@ -209,7 +214,7 @@ describe('SuggestionEngine', () => {
         'doc::heading:h1[0]',
         'doc::heading:h2[0]',
         'doc::heading:h2[1]',
-        'doc::block:code[0]'
+        'doc::block:code[0]',
       ]);
 
       const suggestions = engine.getSuggestions('doc::headng:h2[0]'); // typo
@@ -224,7 +229,7 @@ describe('SuggestionEngine', () => {
       const engine = new SuggestionEngine([
         'doc::block:code[0]',
         'doc::block:paragraph[0]',
-        'doc::block:list[0]'
+        'doc::block:list[0]',
       ]);
 
       const suggestions = engine.getSuggestions('doc::block:cde[0]');

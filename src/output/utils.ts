@@ -23,7 +23,7 @@ export function createTimestamp(): string {
  */
 export function createResponseEnvelope(
   command: 'index' | 'select',
-  success: boolean
+  success: boolean,
 ): Omit<CLIResponse, 'data'> {
   return {
     success,

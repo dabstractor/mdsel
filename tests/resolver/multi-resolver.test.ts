@@ -13,13 +13,13 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc1',
           tree: ast1,
-          availableSelectors: ['doc1::heading:h1[0]']
+          availableSelectors: ['doc1::heading:h1[0]'],
         },
         {
           namespace: 'doc2',
           tree: ast2,
-          availableSelectors: ['doc2::heading:h1[0]']
-        }
+          availableSelectors: ['doc2::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('doc1::heading:h1[0]');
@@ -38,8 +38,8 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc',
           tree: ast,
-          availableSelectors: ['doc::heading:h1[0]']
-        }
+          availableSelectors: ['doc::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('nonexistent::heading:h1[0]');
@@ -61,13 +61,13 @@ describe('resolveMulti', () => {
         {
           namespace: 'readme',
           tree: ast1,
-          availableSelectors: ['readme::heading:h1[0]']
+          availableSelectors: ['readme::heading:h1[0]'],
         },
         {
           namespace: 'changelog',
           tree: ast2,
-          availableSelectors: ['changelog::heading:h1[0]']
-        }
+          availableSelectors: ['changelog::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('redme::heading:h1[0]'); // typo
@@ -92,18 +92,18 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc1',
           tree: ast1,
-          availableSelectors: ['doc1::heading:h1[0]']
+          availableSelectors: ['doc1::heading:h1[0]'],
         },
         {
           namespace: 'doc2',
           tree: ast2,
-          availableSelectors: ['doc2::heading:h1[0]']
+          availableSelectors: ['doc2::heading:h1[0]'],
         },
         {
           namespace: 'doc3',
           tree: ast3,
-          availableSelectors: ['doc3::heading:h1[0]']
-        }
+          availableSelectors: ['doc3::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('heading:h1[0]');
@@ -124,8 +124,8 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc',
           tree: ast,
-          availableSelectors: ['doc::heading:h1[0]']
-        }
+          availableSelectors: ['doc::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('heading:h2[0]');
@@ -145,13 +145,13 @@ describe('resolveMulti', () => {
         {
           namespace: 'with-h1',
           tree: ast1,
-          availableSelectors: ['with-h1::heading:h1[0]']
+          availableSelectors: ['with-h1::heading:h1[0]'],
         },
         {
           namespace: 'no-h1',
           tree: ast2,
-          availableSelectors: ['no-h1::heading:h2[0]']
-        }
+          availableSelectors: ['no-h1::heading:h2[0]'],
+        },
       ];
 
       const selector = parseSelector('heading:h1[0]');
@@ -174,13 +174,13 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc1',
           tree: ast1,
-          availableSelectors: ['doc1::heading:h1[0]', 'doc1::heading:h2[0]']
+          availableSelectors: ['doc1::heading:h1[0]', 'doc1::heading:h2[0]'],
         },
         {
           namespace: 'doc2',
           tree: ast2,
-          availableSelectors: ['doc2::heading:h1[0]', 'doc2::block:code[0]']
-        }
+          availableSelectors: ['doc2::heading:h1[0]', 'doc2::block:code[0]'],
+        },
       ];
 
       // Use a valid selector that doesn't exist (h3 not present)
@@ -217,13 +217,13 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc1',
           tree: ast1,
-          availableSelectors: ['doc1::heading:h1[0]']
+          availableSelectors: ['doc1::heading:h1[0]'],
         },
         {
           namespace: 'doc2',
           tree: ast2,
-          availableSelectors: ['doc2::heading:h1[0]']
-        }
+          availableSelectors: ['doc2::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('heading:h1[0]?full=true');
@@ -246,18 +246,18 @@ describe('resolveMulti', () => {
         {
           namespace: 'guide',
           tree: ast1,
-          availableSelectors: ['guide::heading:h1[0]', 'guide::heading:h2[0]']
+          availableSelectors: ['guide::heading:h1[0]', 'guide::heading:h2[0]'],
         },
         {
           namespace: 'code-examples',
           tree: ast2,
-          availableSelectors: ['code-examples::block:code[0]']
+          availableSelectors: ['code-examples::block:code[0]'],
         },
         {
           namespace: 'checklist',
           tree: ast3,
-          availableSelectors: ['checklist::block:list[0]']
-        }
+          availableSelectors: ['checklist::block:list[0]'],
+        },
       ];
 
       // Test heading selector - should only match guide
@@ -287,8 +287,8 @@ describe('resolveMulti', () => {
         {
           namespace: 'doc',
           tree: ast,
-          availableSelectors: ['doc::root', 'doc::heading:h1[0]', 'doc::heading:h2[0]']
-        }
+          availableSelectors: ['doc::root', 'doc::heading:h1[0]', 'doc::heading:h2[0]'],
+        },
       ];
 
       const selector = parseSelector('doc::root/heading:h1[0]');
@@ -309,8 +309,8 @@ describe('resolveMulti', () => {
         {
           namespace: 'MyDoc',
           tree: ast,
-          availableSelectors: ['MyDoc::heading:h1[0]']
-        }
+          availableSelectors: ['MyDoc::heading:h1[0]'],
+        },
       ];
 
       const selector = parseSelector('mydoc::heading:h1[0]'); // lowercase
@@ -332,7 +332,7 @@ describe('resolveMulti', () => {
       const documents = [
         { namespace: 'z-last', tree: ast1, availableSelectors: ['z-last::heading:h1[0]'] },
         { namespace: 'a-first', tree: ast2, availableSelectors: ['a-first::heading:h1[0]'] },
-        { namespace: 'm-middle', tree: ast3, availableSelectors: ['m-middle::heading:h1[0]'] }
+        { namespace: 'm-middle', tree: ast3, availableSelectors: ['m-middle::heading:h1[0]'] },
       ];
 
       const selector = parseSelector('heading:h1[0]');

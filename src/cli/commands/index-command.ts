@@ -7,12 +7,8 @@
  */
 
 import type { DocumentIndex, IndexSummary, ErrorEntry, CLIResponse } from '../../output/types.js';
-import { parseFile, ParserError, parseMarkdown, type ParserErrorCode } from '../../parser/index.js';
-import {
-  formatIndexResponse,
-  formatErrorResponse,
-  createErrorEntry,
-} from '../../output/index.js';
+import { parseFile, ParserError, parseMarkdown } from '../../parser/index.js';
+import { formatIndexResponse, formatErrorResponse, createErrorEntry } from '../../output/index.js';
 import { deriveNamespace } from '../utils/namespace.js';
 import { buildDocumentIndex } from '../utils/selector-builder.js';
 import { isStdinPiped, readStdin } from '../utils/file-reader.js';
@@ -47,7 +43,7 @@ export async function indexCommand(files: string[]): Promise<void> {
     const error = createErrorEntry(
       'PARSE_ERROR',
       'NO_FILES',
-      'No files provided. Specify files to index or pipe content via stdin.'
+      'No files provided. Specify files to index or pipe content via stdin.',
     );
     console.log(JSON.stringify(formatErrorResponse('index', [error])));
     exitWithCode(ExitCode.ERROR);
@@ -68,13 +64,11 @@ export async function indexCommand(files: string[]): Promise<void> {
             error.code as 'FILE_NOT_FOUND' | 'PARSE_ERROR',
             error.code,
             error.message,
-            error.filePath
-          )
+            error.filePath,
+          ),
         );
       } else if (error instanceof Error) {
-        errors.push(
-          createErrorEntry('PROCESSING_ERROR', 'UNKNOWN', error.message, file)
-        );
+        errors.push(createErrorEntry('PROCESSING_ERROR', 'UNKNOWN', error.message, file));
       }
     }
   }
@@ -92,12 +86,14 @@ export async function indexCommand(files: string[]): Promise<void> {
     const response = formatErrorResponse(
       'index',
       errors,
-      documents as unknown[] // Using unknown[] as safe conversion
-    ) as CLIResponse<unknown>; // Cast to access optional fields
+      documents as unknown[], // Using unknown[] as safe conversion
+    ) as CLIResponse; // Cast to access optional fields
     // Add partial results to response
     response.partial_results = documents as unknown[];
     response.data = { documents, summary } as unknown;
-    response.warnings = [`${String(errors.length)} of ${String(files.length)} file(s) could not be processed`];
+    response.warnings = [
+      `${String(errors.length)} of ${String(files.length)} file(s) could not be processed`,
+    ];
     console.log(JSON.stringify(response));
     exitWithCode(ExitCode.ERROR); // Still exit with error code for partial success
     return;
@@ -130,9 +126,7 @@ async function indexStdin(): Promise<void> {
     exitWithCode(ExitCode.SUCCESS);
   } catch (error) {
     if (error instanceof Error) {
-      errors.push(
-        createErrorEntry('PARSE_ERROR', 'PARSE_ERROR', error.message, '<stdin>')
-      );
+      errors.push(createErrorEntry('PARSE_ERROR', 'PARSE_ERROR', error.message, '<stdin>'));
     }
     console.log(JSON.stringify(formatErrorResponse('index', errors)));
     exitWithCode(ExitCode.ERROR);

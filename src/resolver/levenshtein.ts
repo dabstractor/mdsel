@@ -51,9 +51,9 @@ export function levenshteinDistance(str1: string, str2: string): number {
       const prevRowVal = prevRow[j] ?? 0;
       const prevRowPrevVal = prevRow[j - 1] ?? 0;
       currRow[j] = Math.min(
-        (currRow[j - 1] ?? 0) + 1,        // insertion
-        prevRowVal + 1,                   // deletion
-        prevRowPrevVal + cost             // substitution
+        (currRow[j - 1] ?? 0) + 1, // insertion
+        prevRowVal + 1, // deletion
+        prevRowPrevVal + cost, // substitution
       );
     }
 

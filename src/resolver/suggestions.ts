@@ -51,11 +51,7 @@ export class SuggestionEngine {
    * ```
    */
   getSuggestions(query: string, options: SuggestionOptions = {}): Suggestion[] {
-    const {
-      maxResults = 5,
-      minRatio = 0.4,
-      includeExact = true
-    } = options;
+    const { maxResults = 5, minRatio = 0.4, includeExact = true } = options;
 
     const normalizedQuery = query.toLowerCase().trim();
     const results: SuggestionResult[] = [];
@@ -63,7 +59,7 @@ export class SuggestionEngine {
     // Find exact matches
     if (includeExact) {
       const exactMatches = this.candidates.filter(
-        candidate => candidate.toLowerCase() === normalizedQuery
+        (candidate) => candidate.toLowerCase() === normalizedQuery,
       );
 
       for (const selector of exactMatches) {
@@ -72,7 +68,7 @@ export class SuggestionEngine {
           distance: 0,
           ratio: 1,
           reason: 'exact_match',
-          normalizedSelector: selector.toLowerCase()
+          normalizedSelector: selector.toLowerCase(),
         });
       }
     }
@@ -90,7 +86,11 @@ export class SuggestionEngine {
   /**
    * Find fuzzy matches using Levenshtein distance.
    */
-  private findFuzzyMatches(normalizedQuery: string, skipExact: boolean, minRatio: number): SuggestionResult[] {
+  private findFuzzyMatches(
+    normalizedQuery: string,
+    skipExact: boolean,
+    minRatio: number,
+  ): SuggestionResult[] {
     const results: SuggestionResult[] = [];
 
     for (const candidate of this.candidates) {
@@ -114,7 +114,7 @@ export class SuggestionEngine {
           distance,
           ratio,
           reason,
-          normalizedSelector: normalizedCandidate
+          normalizedSelector: normalizedCandidate,
         });
       }
     }

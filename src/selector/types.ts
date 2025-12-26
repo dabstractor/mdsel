@@ -11,16 +11,16 @@ export enum TokenType {
   PAGE = 'PAGE',
 
   // Separators and operators
-  NAMESPACE_SEP = 'NAMESPACE_SEP',     // ::
-  COLON = 'COLON',                     // :
-  SLASH = 'SLASH',                     // /
-  QUESTION = 'QUESTION',               // ?
-  AMPERSAND = 'AMPERSAND',             // &
-  EQUALS = 'EQUALS',                   // =
+  NAMESPACE_SEP = 'NAMESPACE_SEP', // ::
+  COLON = 'COLON', // :
+  SLASH = 'SLASH', // /
+  QUESTION = 'QUESTION', // ?
+  AMPERSAND = 'AMPERSAND', // &
+  EQUALS = 'EQUALS', // =
 
   // Brackets
-  OPEN_BRACKET = 'OPEN_BRACKET',       // [
-  CLOSE_BRACKET = 'CLOSE_BRACKET',     // ]
+  OPEN_BRACKET = 'OPEN_BRACKET', // [
+  CLOSE_BRACKET = 'CLOSE_BRACKET', // ]
 
   // Literals
   NUMBER = 'NUMBER',
@@ -142,6 +142,7 @@ export class SelectorParseError extends Error {
     this.position = position;
     this.input = input;
     // Maintains proper stack trace in V8 environments
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     Error.captureStackTrace?.(this, SelectorParseError);
   }
 
@@ -155,9 +156,11 @@ export class SelectorParseError extends Error {
     const lineContent = this.input.slice(lineStart, lineEnd === -1 ? undefined : lineEnd);
     const pointer = ' '.repeat(column - 1) + '^';
 
-    return `${this.message}\n` +
-      `  at line ${line}, column ${column}\n` +
+    return (
+      `${this.message}\n` +
+      `  at line ${String(line)}, column ${String(column)}\n` +
       `  ${lineContent}\n` +
-      `  ${pointer}`;
+      `  ${pointer}`
+    );
   }
 }

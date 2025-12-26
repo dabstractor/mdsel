@@ -1,4 +1,4 @@
-import type { Root, Content } from 'mdast';
+// Type imports removed - not used in this file
 
 /**
  * Response envelope for all CLI commands.

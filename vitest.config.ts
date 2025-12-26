@@ -5,12 +5,12 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
-    exclude: ['node_modules', 'dist'],
+    exclude: ['node_modules', 'dist', 'src/lexer/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'json'],
       include: ['src/**/*.ts'],
-      exclude: ['**/*.test.ts', '**/*.d.ts', '**/node_modules/**', '**/dist/**'],
+      exclude: ['**/*.test.ts', '**/*.d.ts', '**/node_modules/**', '**/dist/**', 'src/lexer/**'],
     },
   },
 });

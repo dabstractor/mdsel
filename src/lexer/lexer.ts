@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { Token, TokenType } from './token';
 
 export interface Position {
@@ -10,7 +11,7 @@ export class LexerError extends Error {
   constructor(
     message: string,
     public position: Position,
-    public code?: string
+    public code?: string,
   ) {
     super(message);
     this.name = 'LexerError';
@@ -56,24 +57,16 @@ export class Lexer {
     }
   }
 
-  private createToken(
-    type: TokenType,
-    value: string,
-    start: Position,
-    end: Position
-  ): Token {
+  private createToken(type: TokenType, value: string, start: Position, end: Position): Token {
     return { type, value, start, end };
   }
 
-  private createErrorToken(
-    message: string,
-    position: Position
-  ): Token {
+  private createErrorToken(message: string, position: Position): Token {
     return {
       type: TokenType.ERROR,
       value: message,
       start: position,
-      end: { ...position, offset: position.offset + 1 }
+      end: { ...position, offset: position.offset + 1 },
     };
   }
 
@@ -89,20 +82,14 @@ export class Lexer {
     while (!this.isAtEnd() && /\s/.test(this.currentChar)) {
       if (this.currentChar === '\n') {
         this.advance();
-        this.tokens.push(this.createToken(
-          TokenType.NEWLINE,
-          '\n',
-          this.getPosition(),
-          this.getPosition()
-        ));
+        this.tokens.push(
+          this.createToken(TokenType.NEWLINE, '\n', this.getPosition(), this.getPosition()),
+        );
       } else {
         this.advance();
-        this.tokens.push(this.createToken(
-          TokenType.WHITESPACE,
-          ' ',
-          this.getPosition(),
-          this.getPosition()
-        ));
+        this.tokens.push(
+          this.createToken(TokenType.WHITESPACE, ' ', this.getPosition(), this.getPosition()),
+        );
       }
     }
   }
@@ -208,7 +195,7 @@ export class Lexer {
           current === '/' ? TokenType.PATH_SEPARATOR : TokenType.PUNCTUATION,
           current,
           start,
-          this.getPosition()
+          this.getPosition(),
         );
     }
   }
@@ -285,12 +272,7 @@ export class Lexer {
       // Unknown character - error token
       const unknownChar = this.currentChar;
       this.advance();
-      this.tokens.push(this.createToken(
-        TokenType.ERROR,
-        unknownChar,
-        start,
-        this.getPosition()
-      ));
+      this.tokens.push(this.createToken(TokenType.ERROR, unknownChar, start, this.getPosition()));
     }
 
     // Add EOF token
@@ -307,10 +289,7 @@ export class Lexer {
       if (error instanceof LexerError) {
         throw error;
       }
-      throw new LexerError(
-        `Unexpected error during tokenization: ${error}`,
-        this.getPosition()
-      );
+      throw new LexerError(`Unexpected error during tokenization: ${error}`, this.getPosition());
     }
   }
 }

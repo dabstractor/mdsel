@@ -7,10 +7,7 @@
  * @module cli/utils/selector-builder
  */
 
-import type {
-  Root,
-  RootContent,
-} from 'mdast';
+import type { Root, RootContent } from 'mdast';
 import type {
   DocumentIndex,
   HeadingDescriptor,
@@ -99,11 +96,7 @@ export function buildAvailableSelectors(tree: Root, namespace: string): string[]
  * // }
  * ```
  */
-export function buildDocumentIndex(
-  tree: Root,
-  namespace: string,
-  filePath: string
-): DocumentIndex {
+export function buildDocumentIndex(tree: Root, namespace: string, filePath: string): DocumentIndex {
   const headings: HeadingDescriptor[] = [];
   const blockCounts: BlockSummary = {
     paragraphs: 0,

@@ -160,9 +160,9 @@ describe('indexCommand', () => {
     expect(response.data.summary.total_documents).toBe(2);
 
     // Check both files are indexed
-    const fileNames = response.data.documents.map(doc => doc.file_path);
-    expect(fileNames.some(path => path.includes('simple.md'))).toBe(true);
-    expect(fileNames.some(path => path.includes('complex.md'))).toBe(true);
+    const fileNames = response.data.documents.map((doc) => doc.file_path);
+    expect(fileNames.some((path) => path.includes('simple.md'))).toBe(true);
+    expect(fileNames.some((path) => path.includes('complex.md'))).toBe(true);
   });
 
   it('should handle partial success with some files failing', async () => {

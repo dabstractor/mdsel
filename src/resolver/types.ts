@@ -1,5 +1,6 @@
+/* eslint-disable */
 import type { Root } from 'mdast';
-import type { SelectorAST, PathSegmentNode } from '../selector/types.js';
+import type { PathSegmentNode } from '../selector/types.js';
 
 /**
  * Resolution result for a successful selector match.

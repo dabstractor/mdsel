@@ -351,11 +351,7 @@ describe('formatErrorResponse', () => {
 
 describe('createErrorEntry', () => {
   it('should create valid ErrorEntry object', () => {
-    const entry = createErrorEntry(
-      'FILE_NOT_FOUND',
-      'ENOENT',
-      'File not found: test.md'
-    );
+    const entry = createErrorEntry('FILE_NOT_FOUND', 'ENOENT', 'File not found: test.md');
 
     expect(entry.type).toBe('FILE_NOT_FOUND');
     expect(entry.code).toBe('ENOENT');
@@ -363,12 +359,7 @@ describe('createErrorEntry', () => {
   });
 
   it('should include file when provided', () => {
-    const entry = createErrorEntry(
-      'FILE_NOT_FOUND',
-      'ENOENT',
-      'File not found',
-      'test.md'
-    );
+    const entry = createErrorEntry('FILE_NOT_FOUND', 'ENOENT', 'File not found', 'test.md');
 
     expect(entry.file).toBe('test.md');
   });
@@ -379,7 +370,7 @@ describe('createErrorEntry', () => {
       'NOT_FOUND',
       'Selector not found',
       undefined,
-      'test::h2[99]'
+      'test::h2[99]',
     );
 
     expect(entry.selector).toBe('test::h2[99]');
@@ -393,18 +384,14 @@ describe('createErrorEntry', () => {
       'Selector not found',
       undefined,
       undefined,
-      suggestions
+      suggestions,
     );
 
     expect(entry.suggestions).toEqual(suggestions);
   });
 
   it('should omit optional fields when not provided', () => {
-    const entry = createErrorEntry(
-      'PARSE_ERROR',
-      'SYNTAX_ERROR',
-      'Invalid syntax'
-    );
+    const entry = createErrorEntry('PARSE_ERROR', 'SYNTAX_ERROR', 'Invalid syntax');
 
     expect(entry.file).toBeUndefined();
     expect(entry.selector).toBeUndefined();
@@ -418,7 +405,7 @@ describe('createErrorEntry', () => {
       'Invalid syntax',
       undefined,
       undefined,
-      undefined
+      undefined,
     );
 
     expect(entry.file).toBeUndefined();

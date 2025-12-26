@@ -11,10 +11,7 @@ const pkg = require('../package.json') as { description: string; version: string
 
 const program = new Command();
 
-program
-  .name('mdsel')
-  .description(pkg.description)
-  .version(pkg.version);
+program.name('mdsel').description(pkg.description).version(pkg.version);
 
 program
   .command('index')

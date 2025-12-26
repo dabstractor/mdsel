@@ -20,5 +20,5 @@ export type {
   Suggestion,
   DocumentTree,
   WordCountOptions,
-  ResolutionContext
+  ResolutionContext,
 } from './types.js';

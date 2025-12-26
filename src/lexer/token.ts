@@ -28,7 +28,7 @@ export enum TokenType {
 
   // Special
   EOF = 'EOF',
-  ERROR = 'ERROR'
+  ERROR = 'ERROR',
 }
 
 export interface Token {

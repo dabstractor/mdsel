@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { parseSelector, SelectorParseError, SelectorNodeType, type SelectorAST, type PathSegmentNode } from '../../src/selector/index.js';
+import {
+  parseSelector,
+  SelectorParseError,
+  SelectorNodeType,
+  type SelectorAST,
+  type PathSegmentNode,
+} from '../../src/selector/index.js';
 
 describe('parseSelector', () => {
   describe('valid selectors', () => {

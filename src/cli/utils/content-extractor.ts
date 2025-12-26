@@ -101,10 +101,7 @@ export function countWords(text: string): number {
  * getContentPreview("Very long text...", 10); // "Very long ..."
  * ```
  */
-export function getContentPreview(
-  text: string,
-  maxLen: number = PREVIEW_LENGTH
-): string {
+export function getContentPreview(text: string, maxLen: number = PREVIEW_LENGTH): string {
   // Normalize whitespace - replace newlines and multiple spaces with single space
   const normalized = text.replace(/\s+/g, ' ').trim();
   if (normalized.length <= maxLen) return normalized;
@@ -131,7 +128,7 @@ export function getContentPreview(
  */
 export function truncateContent(
   content: string,
-  options: { full?: boolean } = {}
+  options: { full?: boolean } = {},
 ): TruncatedContent {
   const wordCount = countWords(content);
 

@@ -925,14 +925,14 @@
               "type": "Task",
               "id": "P4.M2.T2",
               "title": "Create Minimal Documentation",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Usage documentation for npm README.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P4.M2.T2.S1",
                   "title": "Write README with usage examples",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P4.M2.T1.S2"
@@ -947,4 +947,3 @@
     }
   ]
 }
-

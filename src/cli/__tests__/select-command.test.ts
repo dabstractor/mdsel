@@ -14,7 +14,9 @@ let capturedOutput: string[] = [];
 
 beforeAll(() => {
   // Create a temporary test file
-  writeFileSync(tempFile, `# Test Document
+  writeFileSync(
+    tempFile,
+    `# Test Document
 
 ## First Section
 
@@ -26,7 +28,8 @@ Content for second section.
 
 ### Subsection
 
-Nested content here.`);
+Nested content here.`,
+  );
 
   // Mock process.exit
   vi.spyOn(process, 'exit').mockImplementation((code?: number) => {
@@ -57,7 +60,7 @@ describe('selectCommand', () => {
   describe('Happy path tests', () => {
     it('should select heading by selector', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]`;
+      const selector = `simple::heading:h1[0]`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 
@@ -79,7 +82,7 @@ describe('selectCommand', () => {
 
     it('should select deeper heading correctly', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h2[0]`;
+      const selector = `simple::heading:h2[0]`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 
@@ -95,7 +98,7 @@ describe('selectCommand', () => {
 
     it('should include children_available when content has children', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'complex'}::heading:h1[0]`;
+      const selector = `complex::heading:h1[0]`;
 
       await expect(selectCommand(selector, [complexFixture])).rejects.toThrow('process.exit(0)');
 
@@ -116,7 +119,9 @@ describe('selectCommand', () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const selector = 'heading:h1[0]';
 
-      await expect(selectCommand(selector, [simpleFixture, complexFixture])).rejects.toThrow('process.exit(0)');
+      await expect(selectCommand(selector, [simpleFixture, complexFixture])).rejects.toThrow(
+        'process.exit(0)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -126,9 +131,11 @@ describe('selectCommand', () => {
 
     it('should handle full content flag with --full option', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]`;
+      const selector = `simple::heading:h1[0]`;
 
-      await expect(selectCommand(selector, [simpleFixture], { full: true })).rejects.toThrow('process.exit(0)');
+      await expect(selectCommand(selector, [simpleFixture], { full: true })).rejects.toThrow(
+        'process.exit(0)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -138,7 +145,7 @@ describe('selectCommand', () => {
 
     it('should handle full content flag with query parameter', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]?full=true`;
+      const selector = `simple::heading:h1[0]?full=true`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 
@@ -154,7 +161,9 @@ describe('selectCommand', () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const invalidSelector = 'invalid::selector::format';
 
-      await expect(selectCommand(invalidSelector, [simpleFixture])).rejects.toThrow('process.exit(1)');
+      await expect(selectCommand(invalidSelector, [simpleFixture])).rejects.toThrow(
+        'process.exit(1)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -171,7 +180,9 @@ describe('selectCommand', () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const emptySelector = '';
 
-      await expect(selectCommand(emptySelector, [simpleFixture])).rejects.toThrow('process.exit(1)');
+      await expect(selectCommand(emptySelector, [simpleFixture])).rejects.toThrow(
+        'process.exit(1)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -184,7 +195,9 @@ describe('selectCommand', () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const malformedSelector = 'heading:['; // Unclosed bracket
 
-      await expect(selectCommand(malformedSelector, [simpleFixture])).rejects.toThrow('process.exit(1)');
+      await expect(selectCommand(malformedSelector, [simpleFixture])).rejects.toThrow(
+        'process.exit(1)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -195,9 +208,11 @@ describe('selectCommand', () => {
 
     it('should handle unresolved selector returns suggestions', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const unresolvedSelector = `${'simple'}::heading:h1[99]`; // Index out of range
+      const unresolvedSelector = `simple::heading:h1[99]`; // Index out of range
 
-      await expect(selectCommand(unresolvedSelector, [simpleFixture])).rejects.toThrow('process.exit(1)');
+      await expect(selectCommand(unresolvedSelector, [simpleFixture])).rejects.toThrow(
+        'process.exit(1)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -217,9 +232,11 @@ describe('selectCommand', () => {
 
     it('should handle selector that matches nothing', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const noMatchSelector = `${'simple'}::heading:h3[99]`; // No h3 headings in simple.md
+      const noMatchSelector = `simple::heading:h3[99]`; // No h3 headings in simple.md
 
-      await expect(selectCommand(noMatchSelector, [simpleFixture])).rejects.toThrow('process.exit(1)');
+      await expect(selectCommand(noMatchSelector, [simpleFixture])).rejects.toThrow(
+        'process.exit(1)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -250,7 +267,9 @@ describe('selectCommand', () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const selector = 'heading:h1[0]';
 
-      await expect(selectCommand(selector, [simpleFixture, complexFixture])).rejects.toThrow('process.exit(0)');
+      await expect(selectCommand(selector, [simpleFixture, complexFixture])).rejects.toThrow(
+        'process.exit(0)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -263,7 +282,9 @@ describe('selectCommand', () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const selector = 'heading:h6[0]'; // No h6 in either fixture
 
-      await expect(selectCommand(selector, [simpleFixture, complexFixture])).rejects.toThrow('process.exit(1)');
+      await expect(selectCommand(selector, [simpleFixture, complexFixture])).rejects.toThrow(
+        'process.exit(1)',
+      );
 
       expect(capturedOutput).toHaveLength(1);
       const response = JSON.parse(capturedOutput[0]);
@@ -294,7 +315,7 @@ describe('selectCommand', () => {
   describe('Response structure tests', () => {
     it('should return valid JSON with correct structure', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]`;
+      const selector = `simple::heading:h1[0]`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 
@@ -311,7 +332,7 @@ describe('selectCommand', () => {
 
     it('should have ISO 8601 timestamp', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]`;
+      const selector = `simple::heading:h1[0]`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 
@@ -323,7 +344,7 @@ describe('selectCommand', () => {
 
     it('should serialize to valid JSON', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]`;
+      const selector = `simple::heading:h1[0]`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 
@@ -333,7 +354,7 @@ describe('selectCommand', () => {
 
     it('should return matches array with correct structure', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `${'simple'}::heading:h1[0]`;
+      const selector = `simple::heading:h1[0]`;
 
       await expect(selectCommand(selector, [simpleFixture])).rejects.toThrow('process.exit(0)');
 

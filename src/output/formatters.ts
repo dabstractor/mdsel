@@ -9,7 +9,7 @@ import type {
   UnresolvedSelector,
   ErrorType,
 } from './types.js';
-import { createTimestamp, createResponseEnvelope, omitNullFields } from './utils.js';
+import { createTimestamp, omitNullFields } from './utils.js';
 
 /**
  * Format an index command response.
@@ -20,7 +20,7 @@ import { createTimestamp, createResponseEnvelope, omitNullFields } from './utils
  */
 export function formatIndexResponse(
   documents: DocumentIndex[],
-  summary: IndexSummary
+  summary: IndexSummary,
 ): CLIResponse<IndexResponse> {
   return {
     success: true,
@@ -42,7 +42,7 @@ export function formatIndexResponse(
  */
 export function formatSelectResponse(
   matches: SelectMatch[],
-  unresolved: UnresolvedSelector[] = []
+  unresolved: UnresolvedSelector[] = [],
 ): CLIResponse<SelectResponse> {
   const hasErrors = unresolved.length > 0;
 
@@ -57,7 +57,7 @@ export function formatSelectResponse(
   };
 
   if (unresolved.length > 0) {
-    response.unresolved_selectors = unresolved.map(u => u.selector);
+    response.unresolved_selectors = unresolved.map((u) => u.selector);
   }
 
   return response;
@@ -74,7 +74,7 @@ export function formatSelectResponse(
 export function formatErrorResponse(
   command: 'index' | 'select',
   errors: ErrorEntry[],
-  partialResults?: unknown[]
+  partialResults?: unknown[],
 ): CLIResponse<null> {
   const response: CLIResponse<null> = {
     success: false,
@@ -108,7 +108,7 @@ export function createErrorEntry(
   message: string,
   file?: string,
   selector?: string,
-  suggestions?: string[]
+  suggestions?: string[],
 ): ErrorEntry {
   return omitNullFields({
     type,

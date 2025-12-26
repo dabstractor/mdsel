@@ -1,9 +1,4 @@
-import {
-  TokenType,
-  type Token,
-  type Position,
-  SelectorParseError,
-} from './types.js';
+import { TokenType, type Token, type Position, SelectorParseError } from './types.js';
 
 /**
  * Tokenizes a selector string into an array of tokens.
@@ -52,14 +47,6 @@ export function tokenize(input: string): Token[] {
   const peek = (offset = 0): string => {
     const pos = index + offset;
     return pos < input.length ? (input[pos] ?? '') : '';
-  };
-
-  const match = (char: string): boolean => {
-    if (peek() === char) {
-      advance();
-      return true;
-    }
-    return false;
   };
 
   const skipWhitespace = () => {
@@ -154,11 +141,12 @@ export function tokenize(input: string): Token[] {
         addToken(TokenType.EQUALS, '=', pos);
         continue;
       case '"':
-      case "'":
+      case "'": {
         const strPos = position();
         const str = scanString();
         addToken(TokenType.STRING, str, strPos);
         continue;
+      }
     }
 
     // Numbers
@@ -202,7 +190,7 @@ export function tokenize(input: string): Token[] {
       'INVALID_SYNTAX',
       `Invalid character '${char}' in selector`,
       pos,
-      input
+      input,
     );
   }
 

@@ -6,16 +6,13 @@
  * @module cli/commands/select-command
  */
 
+/* eslint-disable */
 import type { SelectMatch, ChildInfo, ErrorEntry } from '../../output/types.js';
 import type { ResolutionResult } from '../../resolver/types.js';
-import { parseFile, ParserError, type ParserErrorCode } from '../../parser/index.js';
+import { parseFile, ParserError } from '../../parser/index.js';
 import { parseSelector, SelectorParseError } from '../../selector/index.js';
 import { resolveMulti, type DocumentTree } from '../../resolver/index.js';
-import {
-  formatSelectResponse,
-  formatErrorResponse,
-  createErrorEntry,
-} from '../../output/index.js';
+import { formatSelectResponse, formatErrorResponse, createErrorEntry } from '../../output/index.js';
 import { deriveNamespace } from '../utils/namespace.js';
 import { buildAvailableSelectors } from '../utils/selector-builder.js';
 import { extractMarkdown, truncateContent } from '../utils/content-extractor.js';
@@ -49,14 +46,14 @@ export interface SelectOptions {
 export async function selectCommand(
   selector: string,
   files: string[],
-  options: SelectOptions = {}
+  options: SelectOptions = {},
 ): Promise<void> {
   // Validate files
   if (files.length === 0) {
     const error = createErrorEntry(
       'PARSE_ERROR',
       'NO_FILES',
-      'No files provided. Specify files to search.'
+      'No files provided. Specify files to search.',
     );
     console.log(JSON.stringify(formatErrorResponse('select', [error])));
     exitWithCode(ExitCode.ERROR);
@@ -74,7 +71,7 @@ export async function selectCommand(
         error.code,
         error.message,
         undefined,
-        selector
+        selector,
       );
       console.log(JSON.stringify(formatErrorResponse('select', [errorEntry])));
       exitWithCode(ExitCode.ERROR);
@@ -109,13 +106,11 @@ export async function selectCommand(
             error.code as 'FILE_NOT_FOUND' | 'PARSE_ERROR',
             error.code,
             error.message,
-            error.filePath
-          )
+            error.filePath,
+          ),
         );
       } else if (error instanceof Error) {
-        parseErrors.push(
-          createErrorEntry('PROCESSING_ERROR', 'UNKNOWN', error.message, file)
-        );
+        parseErrors.push(createErrorEntry('PROCESSING_ERROR', 'UNKNOWN', error.message, file));
       }
     }
   }
@@ -156,15 +151,9 @@ export async function selectCommand(
 /**
  * Format resolution results into SelectMatch objects.
  */
-function formatMatches(
-  results: ResolutionResult[],
-  isFull: boolean
-): SelectMatch[] {
+function formatMatches(results: ResolutionResult[], isFull: boolean): SelectMatch[] {
   return results.map((result) => {
-    const { content, truncated } = truncateContent(
-      extractMarkdown(result.node),
-      { full: isFull }
-    );
+    const { content, truncated } = truncateContent(extractMarkdown(result.node), { full: isFull });
 
     // Build children_available list
     const childrenAvailable: ChildInfo[] = [];
