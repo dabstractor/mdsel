@@ -461,21 +461,21 @@
           "type": "Milestone",
           "id": "P2.M2",
           "title": "Selector Resolver",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Resolve parsed selectors against semantic trees to retrieve nodes.",
           "tasks": [
             {
               "type": "Task",
               "id": "P2.M2.T1",
               "title": "Implement Selector Resolution",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Core resolution logic matching selectors to tree nodes.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M2.T1.S1",
                   "title": "Define resolution types",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P2.M1.T4.S1"
@@ -486,7 +486,7 @@
                   "type": "Subtask",
                   "id": "P2.M2.T1.S2",
                   "title": "Implement single-tree resolver",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P2.M2.T1.S1"
@@ -497,7 +497,7 @@
                   "type": "Subtask",
                   "id": "P2.M2.T1.S3",
                   "title": "Implement multi-tree resolver",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P2.M2.T1.S2"
@@ -510,14 +510,14 @@
               "type": "Task",
               "id": "P2.M2.T2",
               "title": "Implement Suggestion Generator",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Generate fuzzy suggestions for failed selectors.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M2.T2.S1",
                   "title": "Implement Levenshtein distance",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P2.M2.T1.S3"
@@ -528,7 +528,7 @@
                   "type": "Subtask",
                   "id": "P2.M2.T2.S2",
                   "title": "Implement suggestion generator",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P2.M2.T2.S1"
@@ -541,14 +541,14 @@
               "type": "Task",
               "id": "P2.M2.T3",
               "title": "Resolver Test Suite",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Tests for selector resolution.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P2.M2.T3.S1",
                   "title": "Write resolver unit tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P2.M2.T2.S2"
