@@ -1,17 +1,8 @@
-# mdsel - Markdown Selector with Pagination
+# mdsel
 
-A powerful CLI tool for selecting and paginating markdown content with advanced word and sentence-based pagination capabilities.
+Declarative Markdown semantic selection CLI for LLM agents.
 
-## Features
-
-- **Word-Based Pagination**: Split markdown content into pages by word count
-- **Sentence-Aware Truncation**: Intelligent truncation at sentence boundaries
-- **Markdown Preservation**: Code blocks and formatting remain intact across page boundaries
-- **Interactive Navigation**: Navigate through pages using intuitive commands
-- **Flexible Query Parameters**: Support for `?page=`, `?full=true`, and `?words_per_page=`
-- **Terminal Optimization**: Auto-detect terminal size for optimal word count per page
-- **JSON Output**: Structured output for programmatic consumption
-- **Comprehensive Metadata**: Detailed pagination statistics and state information
+mdsel parses Markdown documents into semantic trees and exposes machine-addressable selectors for every meaningful chunk. It enables LLMs to request exactly the content they want—no more, no less—without loading entire files into context.
 
 ## Installation
 
@@ -19,287 +10,353 @@ A powerful CLI tool for selecting and paginating markdown content with advanced 
 npm install -g mdsel
 ```
 
-Or use locally:
+**Requirements**: Node.js >=18.0.0
+
+## Quick Start
 
 ```bash
-npm install
-npm link
+# Index a document to discover available selectors
+mdsel index README.md
+
+# Select a specific heading
+mdsel select "readme::heading:h1[0]" README.md
+
+# Select the first code block under a heading
+mdsel select "readme::heading:h2[0]/block:code[0]" README.md
+
+# Get full content (bypass truncation)
+mdsel select "readme::section[0]?full=true" README.md
 ```
 
-## Usage
+All commands return structured JSON output for programmatic consumption.
 
-### Basic Pagination
+## Commands
+
+### index
+
+Parse documents and emit selector inventory.
 
 ```bash
-# Paginate a markdown file (default: 500 words per page)
-mdsel paginate document.md
-
-# Show specific page
-mdsel paginate document.md -p 3
-
-# Show full content without pagination
-mdsel paginate document.md -f
-
-# Custom words per page
-mdsel paginate document.md -w 1000
+mdsel index <files...>
 ```
 
-### Terminal-Aware Pagination
-
+**Example**:
 ```bash
-# Automatically optimize for terminal size
-mdsel paginate document.md -t
-
-# See estimated optimal words per page
-mdsel info document.md --estimate
+mdsel index README.md docs/API.md
 ```
 
-### JSON Output
-
-```bash
-# Output in JSON format
-mdsel paginate document.md -j
-
-# Include metadata
-mdsel paginate document.md -j -m
-```
-
-### Interactive Navigation
-
-When viewing paginated content interactively:
-
-```
-Page 2 of 5
-──────────────────────────────────────────────────────────────────────────────────────────────────────
-... content of page 2 ...
-
-──────────────────────────────────────────────────────────────────────────────────────────────────────
-Navigation: [n]ext [p]revious [1-5] page [q]uit
->
-```
-
-Commands:
-- `n` or `next`: Next page
-- `p` or `previous`: Previous page
-- `1-5`: Go to specific page number
-- `q` or `quit`: Exit viewer
-
-### Sentence-Based Pagination
-
-```bash
-# Use sentence boundaries instead of word boundaries
-mdsel paginate document.md -s
-
-# Good for articles and documents with clear sentence structure
-```
-
-## API Usage
-
-### Pagination Configuration
-
-```typescript
-import {
-  PaginationManager,
-  PaginationController,
-  paginateByWords,
-  paginateBySentences,
-  smartTruncate
-} from 'mdsel';
-
-// Basic word-based pagination
-const result = paginateByWords(content, {
-  wordsPerPage: 500,
-  preserveBoundaries: true,
-  addTruncationMarker: true
-});
-
-// Sentence-aware pagination
-const sentenceResult = paginateBySentences(content, 300);
-
-// Smart truncation
-const truncated = smartTruncate(content, {
-  maxWords: 200,
-  preserveMarkdown: true,
-  marker: '[...]',
-  markerPlacement: 'end'
-});
-```
-
-### State Management
-
-```typescript
-// Create pagination manager
-const manager = new PaginationManager(content, 500);
-
-// Navigate through pages
-const currentPage = manager.getPage(1);
-const nextPage = manager.nextPage();
-const previousPage = manager.previousPage();
-
-// Get state information
-const state = manager.getState();
-console.log(`Page ${state.currentPage} of ${state.totalPages}`);
-
-// Go to specific page
-manager.goToPage(3);
-```
-
-### Query Handling
-
-```typescript
-// Create controller for handling query parameters
-const controller = new PaginationController(content, 500);
-
-// Handle ?page=2&full=false query
-const result = controller.handleQuery({
-  page: '2',
-  full: 'false',
-  words_per_page: '300'
-});
-
-// Access pagination metadata
-console.log(result.pagination);
-console.log(result.content);
-
-// For full content requests
-const fullResult = controller.handleQuery({ full: 'true' });
-```
-
-## Pagination Metadata
-
-The pagination system provides comprehensive metadata in JSON format:
-
+**Output**:
 ```json
 {
-  "pagination": {
-    "current_page": 2,
-    "total_pages": 5,
-    "total_words": 2500,
-    "words_per_page": 500,
-    "is_truncated": true,
-    "last_page_word_count": 300,
-    "has_next_page": true,
-    "has_previous_page": true
-  },
-  "content": "... current page content ...",
-  "metadata": {
-    "timestamp": "2024-01-01T12:00:00.000Z",
-    "content_hash": "abc123..."
+  "success": true,
+  "command": "index",
+  "timestamp": "2025-01-15T10:30:00.000Z",
+  "data": {
+    "documents": [
+      {
+        "namespace": "readme",
+        "file_path": "README.md",
+        "root": {
+          "selector": "readme::root",
+          "type": "root",
+          "content_preview": "Project description...",
+          "truncated": false,
+          "children_count": 2,
+          "word_count": 42
+        },
+        "headings": [
+          {
+            "selector": "readme::heading:h1[0]",
+            "type": "heading:h1",
+            "depth": 1,
+            "text": "Installation",
+            "content_preview": "Installation",
+            "truncated": false,
+            "children_count": 3,
+            "word_count": 1,
+            "section_word_count": 85,
+            "section_truncated": false
+          }
+        ],
+        "blocks": {
+          "paragraphs": 5,
+          "code_blocks": 2,
+          "lists": 1,
+          "tables": 0,
+          "blockquote": 0
+        }
+      }
+    ],
+    "summary": {
+      "total_documents": 1,
+      "total_nodes": 8,
+      "total_selectors": 8
+    }
   }
 }
 ```
 
-## Algorithm Details
+### select
 
-### Word-Based Pagination
+Retrieve content via selectors.
 
-1. **Code Block Preservation**: Markdown code blocks are temporarily removed to prevent splitting
-2. **Word Boundary Detection**: When `preserveBoundaries` is true, the algorithm looks for natural break points (spaces, punctuation)
-3. **Reconstruction**: After pagination, code blocks are restored to their original positions
+```bash
+mdsel select <selector> [files...]
+mdsel select <selector> [files...] --full
+```
 
-### Sentence-Aware Pagination
+**Arguments**:
+- `<selector>` - Selector string (see [Selectors](#selectors))
+- `[files...]` - Markdown files to search (optional, uses stdin if omitted)
 
-1. **Sentence Splitting**: Content is split at sentence boundaries (periods, exclamation, question marks)
-2. **Page Assembly**: Sentences are grouped until the word limit is reached
-3. **Perfect Boundaries**: Pages always end at complete sentences
+**Options**:
+- `--full` - Bypass truncation and return full content
 
-### Smart Truncation
+**Examples**:
+```bash
+# Select from specific document
+mdsel select "readme::heading:h2[0]" README.md
 
-1. **Markdown-Aware**: Preserves headers, bold, italic, and other markdown elements
-2. **Sentence Detection**: Finds the best truncation point at sentence boundaries
-3. **Flexible Markers**: Supports custom truncation markers and placement options
+# Select first code block
+mdsel select "block:code[0]" README.md
 
-## Query Parameters
+# Select with full content
+mdsel select "readme::section[1]" README.md --full
 
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `page` | Page number to display | `?page=3` |
-| `full` | Bypass pagination and show all content | `?full=true` |
-| `words_per_page` | Override default words per page | `?words_per_page=1000` |
+# Cross-document selection (all documents)
+mdsel select "heading:h1[0]" README.md GUIDE.md
 
-## Configuration Options
+# Query parameter for full retrieval
+mdsel select "readme::section[2]?full=true" README.md
+```
 
-### PaginationManager
-
-```typescript
-interface PaginationConfig {
-  wordsPerPage: number;        // Target words per page
-  preserveBoundaries: boolean; // Split at word/sentence boundaries
-  addTruncationMarker?: boolean; // Add [truncated] marker
+**Output**:
+```json
+{
+  "success": true,
+  "command": "select",
+  "timestamp": "2025-01-15T10:32:00.000Z",
+  "data": {
+    "matches": [
+      {
+        "selector": "readme::heading:h2[0]",
+        "type": "heading:h2",
+        "content": "## Quick Start\n\nTo get started...",
+        "truncated": false,
+        "children_available": [
+          {
+            "selector": "readme::heading:h2[0]/block:paragraph[0]",
+            "type": "block:paragraph",
+            "preview": "To get started..."
+          }
+        ]
+      }
+    ],
+    "unresolved": []
+  }
 }
 ```
 
-### Smart Truncation
+## Selectors
+
+Selectors are path-based, ordinal, stateless, and deterministic. They resemble CSS/XPath conceptually but are purpose-built for Markdown.
+
+### Syntax
+
+```
+[namespace::]type[index][/path]?query
+```
+
+- **namespace** (optional) - Document identifier, defaults to all documents
+- **type** - Node type (root, heading, section, block)
+- **index** (optional) - 0-based ordinal among siblings
+- **path** (optional) - Additional path segments for nested selection
+- **query** (optional) - Query parameters (e.g., `?full=true`)
+
+### Node Types
+
+| Category | Types |
+|----------|-------|
+| Root | `root` |
+| Headings | `heading:h1`, `heading:h2`, `heading:h3`, `heading:h4`, `heading:h5`, `heading:h6` |
+| Sections | `section` |
+| Blocks | `block:paragraph`, `block:list`, `block:code`, `block:table`, `block:blockquote` |
+
+### Examples
+
+**Basic selection**:
+```bash
+root                           # Document root
+heading:h1[0]                  # First h1 heading
+heading:h2[1]                  # Second h2 heading
+block:code[0]                  # First code block
+```
+
+**Namespace selection**:
+```bash
+readme::root                   # Root in specific document
+docs::heading:h2[0]            # First h2 in docs
+api::block:table[1]            # Second table in api
+```
+
+**Path composition**:
+```bash
+heading:h2[1]/block:code[0]            # First code block under second h2
+section[0]/block:list[1]               # Second list in first section
+docs::heading:h2[0]/section[0]/block:code[0]  # Nested path
+```
+
+**Query parameters**:
+```bash
+section[2]?full=true            # Full content bypassing truncation
+heading:h1[0]?full=true         # Full heading content
+```
+
+**Cross-document selection**:
+```bash
+heading:h1[0]                   # First h1 from ALL documents
+block:code[0]                   # First code block from ALL documents
+```
+
+### Index Semantics
+
+- Index is **0-based** (first item is index 0)
+- Index counts among siblings of the same type
+- Index is relative to parent context, not global
+
+## Output Format
+
+All commands return structured JSON following the response envelope:
 
 ```typescript
-interface TruncationOptions {
-  maxWords: number;                    // Maximum words before truncation
-  preserveMarkdown: boolean;           // Preserve markdown formatting
-  marker?: string;                     // Custom truncation marker
-  markerPlacement?: 'beginning' | 'end' | 'both'; // Marker placement
+interface CLIResponse<T = unknown> {
+  success: boolean;
+  command: 'index' | 'select';
+  timestamp: string;        // ISO 8601 format
+  data: T | null;
+  errors?: ErrorEntry[];
 }
 ```
 
-## Examples
+### Index Response Schema
 
-### Blog Post Reader
-
-```bash
-# Read a long blog post with optimal terminal sizing
-mdsel blog-post.md -t -s
-
-# Export to JSON for integration with other tools
-mdsel blog-post.md -j -m > blog-pagination.json
+```typescript
+interface IndexResponse {
+  documents: DocumentIndex[];
+  summary: {
+    total_documents: number;
+    total_nodes: number;
+    total_selectors: number;
+  };
+}
 ```
 
-### Documentation Viewer
+### Select Response Schema
 
-```bash
-# View API documentation with custom page size
-mdsel api-docs.md -w 300 -p 1
-
-# Show all documentation at once
-mdsel api-docs.md -f -j
+```typescript
+interface SelectResponse {
+  matches: {
+    selector: string;
+    type: string;
+    content: string;
+    truncated: boolean;
+    pagination?: {
+      current_page: number;
+      total_pages: number;
+      word_count: number;
+      has_more: boolean;
+    };
+    children_available: {
+      selector: string;
+      type: string;
+      preview: string;
+    }[];
+  }[];
+  unresolved: {
+    selector: string;
+    reason: string;
+    suggestions: string[];
+  }[];
+}
 ```
 
-### Content Analysis
+### Truncation
 
-```bash
-# Get statistics about a document
-mdsel info document.md -w -s
+Content exceeding size limits is truncated with a `[truncated]` marker. Use `?full=true` query parameter or `--full` flag to bypass truncation.
 
-# Estimate optimal pagination settings
-mdsel info document.md --estimate
+## Error Handling
+
+### Exit Codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Error |
+| 2 | Usage error |
+
+### Error Types
+
+| Type | Description |
+|------|-------------|
+| `FILE_NOT_FOUND` | Specified file does not exist |
+| `PARSE_ERROR` | Markdown parsing failed |
+| `INVALID_SELECTOR` | Selector syntax is invalid |
+| `SELECTOR_NOT_FOUND` | Selector does not match any nodes |
+| `NAMESPACE_NOT_FOUND` | Specified namespace does not exist |
+| `PROCESSING_ERROR` | General processing error |
+
+### Error Response Example
+
+```json
+{
+  "success": false,
+  "command": "select",
+  "timestamp": "2025-01-15T10:38:00.000Z",
+  "data": {
+    "matches": [],
+    "unresolved": [
+      {
+        "selector": "readme::heading:h2[99]",
+        "reason": "Index out of range: document has 3 h2 headings",
+        "suggestions": [
+          "readme::heading:h2[0]",
+          "readme::heading:h2[1]",
+          "readme::heading:h2[2]"
+        ]
+      }
+    ]
+  }
+}
 ```
+
+### Suggestions
+
+When a selector fails to resolve, the tool provides fuzzy-matched suggestions based on:
+- Known selector grammar
+- Existing selectors in the document
+- Levenshtein distance and prefix similarity
 
 ## Development
 
-### Running Tests
-
 ```bash
+# Run tests
 npm test
-```
 
-### Building
-
-```bash
+# Build project
 npm run build
-```
 
-### Linting
-
-```bash
+# Lint code
 npm run lint
+
+# Format code
+npm run format
+
+# Type check
+npm run type-check
 ```
 
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Ensure all tests pass
-5. Submit a pull request
+**Requirements**: Node.js >=18.0.0, npm
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT

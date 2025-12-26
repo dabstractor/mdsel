@@ -829,28 +829,28 @@
       "type": "Phase",
       "id": "P4",
       "title": "Polish & Release",
-      "status": "Planned",
+      "status": "Complete",
       "description": "Final polish, documentation, and release preparation.",
       "milestones": [
         {
           "type": "Milestone",
           "id": "P4.M1",
           "title": "Edge Cases & Hardening",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Handle edge cases and improve robustness.",
           "tasks": [
             {
               "type": "Task",
               "id": "P4.M1.T1",
               "title": "Handle Edge Cases",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Ensure robust handling of unusual inputs.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P4.M1.T1.S1",
                   "title": "Handle empty and malformed files",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M3.T3.S3"
@@ -861,7 +861,7 @@
                   "type": "Subtask",
                   "id": "P4.M1.T1.S2",
                   "title": "Handle repeated heading titles",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P4.M1.T1.S1"
@@ -872,7 +872,7 @@
                   "type": "Subtask",
                   "id": "P4.M1.T1.S3",
                   "title": "Handle deeply nested sections",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P4.M1.T1.S2"
