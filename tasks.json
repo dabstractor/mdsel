@@ -113,7 +113,7 @@
           "type": "Milestone",
           "id": "P1.M2",
           "title": "Markdown Parser Integration",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Integrate remark/unified to parse Markdown into mdast AST.",
           "tasks": [
             {
