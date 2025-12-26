@@ -113,21 +113,21 @@
           "type": "Milestone",
           "id": "P1.M2",
           "title": "Markdown Parser Integration",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Integrate remark/unified to parse Markdown into mdast AST.",
           "tasks": [
             {
               "type": "Task",
               "id": "P1.M2.T1",
               "title": "Implement Markdown Parser Module",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Create the core parser that converts Markdown text to mdast AST.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M2.T1.S1",
                   "title": "Define mdast type definitions",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M1.T2.S2"
@@ -138,7 +138,7 @@
                   "type": "Subtask",
                   "id": "P1.M2.T1.S2",
                   "title": "Create unified processor factory",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M2.T1.S1"
@@ -149,7 +149,7 @@
                   "type": "Subtask",
                   "id": "P1.M2.T1.S3",
                   "title": "Implement parseMarkdown function",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M2.T1.S2"
@@ -160,7 +160,7 @@
                   "type": "Subtask",
                   "id": "P1.M2.T1.S4",
                   "title": "Implement parseFile function",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M2.T1.S3"
@@ -173,14 +173,14 @@
               "type": "Task",
               "id": "P1.M2.T2",
               "title": "Create Parser Test Suite",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Comprehensive tests for Markdown parsing.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P1.M2.T2.S1",
                   "title": "Create test fixtures",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P1.M2.T1.S4"
@@ -191,7 +191,7 @@
                   "type": "Subtask",
                   "id": "P1.M2.T2.S2",
                   "title": "Write parser unit tests",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P1.M2.T2.S1"

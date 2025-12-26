@@ -1,0 +1,380 @@
+================================================================================
+  MARKDOWN PARSER TESTING PATTERNS - COMPREHENSIVE RESEARCH SUMMARY
+================================================================================
+
+PROJECT: mdsel (Markdown Selector CLI)
+DATE: December 2025
+FRAMEWORK: Vitest + remark/unified + MDAST
+RESEARCH SCOPE: Testing patterns, fixtures, edge cases, file I/O mocking
+
+================================================================================
+DELIVERABLES
+================================================================================
+
+Location: /home/dustin/projects/mdsel/plan/P1M2/research/
+
+Files Created:
+  1. parser-testing-patterns.md (1309 lines) - Comprehensive guide
+  2. QUICK_REFERENCE.md (211 lines) - Developer quick lookup
+  3. README.md (176 lines) - Navigation & summary
+  4. RESEARCH_SUMMARY.txt (this file) - Overview
+
+Total Research: 1696 lines of documented guidance
+Total Size: 52KB
+
+================================================================================
+KEY TOPICS RESEARCHED
+================================================================================
+
+1. TEST FIXTURE PATTERNS (Section 1)
+   - Recommended directory structure
+   - Fixture file naming conventions
+   - Fixture utilities helper (TypeScript)
+   - Test file organization example
+
+   Status: COMPLETE with code examples
+
+2. SNAPSHOT TESTING STRATEGIES (Section 2)
+   - When to use snapshot testing
+   - Three Vitest snapshot methods:
+     * toMatchSnapshot() - Separate .snap files
+     * toMatchInlineSnapshot() - Inline in test
+     * toMatchFileSnapshot() - Custom file format
+   - Custom serializer for MDAST nodes
+   - Handling dynamic values
+   - Update commands
+
+   Status: COMPLETE with 3 working examples
+
+3. EDGE CASE COVERAGE (Section 3)
+   - Empty files (whitespace, newlines)
+   - Heading-only documents
+   - Deeply nested lists (5+ levels)
+   - GFM features:
+     * Tables (basic, alignment, special chars)
+     * Strikethrough
+     * Task lists
+     * Autolinks
+   - Unicode & special characters:
+     * Emoji and ZWJ sequences
+     * Combining marks
+     * RTL text
+     * Zero-width characters
+   - Code blocks (various languages, edge cases)
+
+   Status: COMPLETE with 30+ test examples
+
+4. VITEST AST TESTING (Section 4)
+   - Test suite organization
+   - Node type validation
+   - Tree structure validation
+   - AST validation helpers
+   - Tree traversal utilities:
+     * findNodesByType() - Find all nodes by type
+     * getTreeDepth() - Calculate tree depth
+     * countNodes() - Count total nodes
+     * findNode() - Find first matching node
+   - Testing parser options/configuration
+
+   Status: COMPLETE with helper code & examples
+
+5. FILE I/O MOCKING (Section 5)
+   - Using memfs for in-memory filesystem
+   - Creating mock files (__mocks__/fs.cjs)
+   - Mocking synchronous file operations
+   - Mocking async (fs/promises) operations
+   - Mocking specific fs functions
+
+   Status: COMPLETE with 4+ patterns
+
+6. REAL-WORLD EXAMPLES (Section 6)
+   - Integration test example (full doc parsing)
+   - Performance test example
+
+   Status: COMPLETE with working code
+
+================================================================================
+SOURCE RESEARCH
+================================================================================
+
+Primary Sources Consulted:
+  - Vitest Official Documentation (snapshot & mocking guides)
+  - GitHub remark/unified repositories
+  - Remark-gfm plugin documentation
+  - Test fixtures pattern implementations
+  - Unicode/emoji testing best practices
+  - Node.js markdown parser analysis
+
+Total Sources: 25+ authoritative references
+All sources tracked and linked in documents
+
+================================================================================
+CODE EXAMPLES PROVIDED
+================================================================================
+
+Fixture Utilities:
+  - loadFixture() - Load single fixture
+  - loadAllFixtures() - Load fixture directory
+
+AST Helpers:
+  - findNodesByType()
+  - getTreeDepth()
+  - countNodes()
+  - findNode()
+
+Custom Serializer:
+  - MDAST node serializer (excludes position data)
+
+Test Patterns (15+ examples):
+  - Basic snapshot tests
+  - Tree structure tests
+  - Edge case tests
+  - File I/O mock tests
+  - GFM feature tests
+  - Unicode edge cases
+  - Performance tests
+  - Integration tests
+
+Mock Setup:
+  - Synchronous fs mocking
+  - Async fs/promises mocking
+  - File system function mocking
+
+================================================================================
+EDGE CASES COVERAGE MATRIX
+================================================================================
+
+Empty Files:
+  ✓ Completely empty
+  ✓ Whitespace only
+  ✓ Newlines only
+
+Headings Only:
+  ✓ Multiple heading levels
+  ✓ No trailing content
+
+Nested Lists:
+  ✓ 5+ nesting levels
+  ✓ Mixed markers (unordered + ordered)
+  ✓ Without blank lines
+  ✓ Inconsistent indentation
+
+GFM Tables:
+  ✓ Basic structure
+  ✓ Alignment indicators
+  ✓ Special characters in cells
+  ✓ Single-cell tables
+
+GFM Strikethrough:
+  ✓ Basic strikethrough
+  ✓ Nested formatting
+  ✓ Single tilde (non-matching)
+
+GFM Task Lists:
+  ✓ Unchecked tasks
+  ✓ Checked tasks
+  ✓ Mixed with regular items
+
+GFM Autolinks:
+  ✓ URLs without angle brackets
+  ✓ URLs in parentheses
+
+Unicode/Special Characters:
+  ✓ Emoji in text
+  ✓ Emoji with ZWJ (families, etc)
+  ✓ Combining marks (accents)
+  ✓ RTL text
+  ✓ Zero-width characters
+  ✓ Markdown special chars literal
+  ✓ Various dash types
+  ✓ Unicode in code blocks
+  ✓ Mixed scripts
+
+Code Blocks:
+  ✓ Fenced with language
+  ✓ Empty code blocks
+  ✓ No language specified
+  ✓ Backticks inside code
+  ✓ Whitespace preservation
+  ✓ Indented code (4 spaces)
+  ✓ Inline code with special chars
+
+TOTAL EDGE CASES: 40+
+
+================================================================================
+TESTING CHECKLIST FOR MDSEL
+================================================================================
+
+Phase 1: Foundation
+  [ ] Create test/fixtures directory structure
+  [ ] Implement fixtures.utils.ts
+  [ ] Implement ast-helpers.ts
+  [ ] Configure Vitest snapshots
+  [ ] Create custom MDAST serializer
+
+Phase 2: Basic Tests
+  [ ] Paragraphs
+  [ ] Headings (all levels)
+  [ ] Emphasis (bold, italic)
+  [ ] Links
+  [ ] Blockquotes
+  [ ] Snapshots for all basic features
+
+Phase 3: Advanced Features
+  [ ] GFM tables
+  [ ] GFM strikethrough
+  [ ] GFM task lists
+  [ ] Footnotes
+  [ ] Test with gfm: true/false
+
+Phase 4: Edge Cases
+  [ ] Empty files
+  [ ] Nested lists (up to 10 levels)
+  [ ] Unicode/emoji edge cases
+  [ ] Code block variants
+  [ ] Special character handling
+  [ ] Create 50+ edge case fixtures
+
+Phase 5: File I/O
+  [ ] Set up memfs mocking
+  [ ] File read operations
+  [ ] File write operations
+  [ ] Bulk file processing
+  [ ] Error handling
+
+Phase 6: Performance
+  [ ] Parse time benchmarks
+  [ ] Large document handling
+  [ ] Deep nesting performance
+  [ ] Set realistic thresholds
+
+Phase 7: Quality
+  [ ] Review snapshot coverage
+  [ ] Document test patterns
+  [ ] Optimize test execution
+  [ ] Coverage reporting
+
+================================================================================
+CRITICAL POINTS TO REMEMBER
+================================================================================
+
+1. SNAPSHOT CLEANLINESS
+   Always exclude position data from snapshots - causes false failures
+   Use custom serializers to keep snapshots focused and readable
+
+2. FIXTURE ORGANIZATION
+   Use hierarchical directories matching feature structure
+   Fixtures/utils.ts for programmatic loading
+   Separates test data from test logic
+
+3. EDGE CASE IMPORTANCE
+   Test deeply nested structures (5+ levels minimum)
+   Unicode/emoji are NOT just nice-to-have, test thoroughly
+   GFM features have many subtle edge cases
+
+4. FILE I/O TESTING
+   Never use actual filesystem in unit tests
+   memfs provides reliable, isolated testing
+   Always reset between tests (vol.reset())
+
+5. SNAPSHOT UPDATES
+   Treat snapshot changes like code changes
+   Review in git diff before committing
+   Use vitest -u only when intentional
+
+6. TREE TRAVERSAL
+   Create reusable helpers (findNodesByType, countNodes, etc)
+   Use for assertions AND test organization
+   Better than deeply nested object checks
+
+7. CONFIGURATION TESTING
+   Test with options enabled AND disabled
+   Behavior must differ when options change
+   Don't assume defaults work everywhere
+
+8. PERFORMANCE MATTERS
+   Include performance tests early
+   Deeply nested structures can be slow
+   Set realistic thresholds based on use cases
+
+================================================================================
+QUICK REFERENCE GUIDE
+================================================================================
+
+For quick lookups during development, see: QUICK_REFERENCE.md
+
+Includes:
+  - File structure template
+  - Snapshot methods comparison
+  - Common test patterns (copy-paste ready)
+  - Essential commands
+  - AST helper functions
+  - Complete edge case checklist
+  - Performance benchmarks
+  - Tips & tricks
+  - Common pitfalls
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Read README.md for document navigation
+2. Review parser-testing-patterns.md Sections 1-2 (fixtures & snapshots)
+3. Create test directory structure
+4. Implement helper utilities
+5. Start with basic test fixtures
+6. Add tests progressively (sections 3-6)
+7. Reference QUICK_REFERENCE.md during coding
+
+================================================================================
+RESEARCH QUALITY METRICS
+================================================================================
+
+Documentation:
+  - 1696 total lines of guidance
+  - 30+ working code examples
+  - 40+ edge case test examples
+  - 15+ test pattern variations
+  - Fully typed TypeScript code
+
+Coverage:
+  - All 5 GFM features documented
+  - 9 Unicode/emoji edge cases
+  - 8 file I/O patterns
+  - 3 snapshot methods
+  - 4 tree traversal helpers
+
+Authority:
+  - 25+ source references
+  - Official Vitest documentation
+  - Official remark/unified repos
+  - Industry best practices
+
+Specificity:
+  - Code is copy-paste ready
+  - Examples include imports & types
+  - Clear explanations for each concept
+  - Real-world use cases
+
+================================================================================
+FILES & PATHS
+================================================================================
+
+All files located at:
+/home/dustin/projects/mdsel/plan/P1M2/research/
+
+Files:
+  1. parser-testing-patterns.md    - Comprehensive reference
+  2. QUICK_REFERENCE.md             - Developer lookup
+  3. README.md                       - Navigation & summary
+  4. RESEARCH_SUMMARY.txt            - This file
+
+View the main guide:
+  cat /home/dustin/projects/mdsel/plan/P1M2/research/parser-testing-patterns.md
+
+Or view quick reference:
+  cat /home/dustin/projects/mdsel/plan/P1M2/research/QUICK_REFERENCE.md
+
+================================================================================
+END OF SUMMARY
+================================================================================
