@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "description": "Declarative Markdown semantic selection CLI for LLM agents",
   "type": "module",
-  "main": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
   "bin": {
     "mdsel": "./dist/cli.mjs"
+  },
+  "exports": {
+    "./cli": {
+      "types": "./dist/cli.d.ts",
+      "import": "./dist/cli.mjs"
+    }
   },
   "files": [
     "dist"
