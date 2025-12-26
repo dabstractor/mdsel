@@ -1,6 +1,15 @@
-import { readFile, access } from 'node:fs/promises';
+import { readFile, access, stat } from 'node:fs/promises';
 import { createProcessor } from './processor.js';
 import { ParserError, type ParserOptions, type ParseResult } from './types.js';
+import {
+  isLikelyBinary,
+  isValidUtf8,
+  sanitizeInput,
+  getNestingDepth,
+  DEFAULT_MAX_FILE_SIZE,
+  DEFAULT_MAX_DEPTH,
+  formatFileSize,
+} from '../utils/validation.js';
 
 /**
  * Parses a Markdown string into an mdast Abstract Syntax Tree.
@@ -18,6 +27,16 @@ import { ParserError, type ParserOptions, type ParseResult } from './types.js';
 export function parseMarkdown(content: string, options?: ParserOptions): ParseResult {
   const processor = createProcessor(options);
   const ast = processor.parse(content);
+
+  // Validate depth after parsing
+  const maxDepth = options?.maxDepth ?? DEFAULT_MAX_DEPTH;
+  const actualDepth = getNestingDepth(ast);
+  if (actualDepth > maxDepth) {
+    throw new Error(
+      `Maximum nesting depth of ${String(maxDepth)} exceeded (found depth of ${String(actualDepth)}). ` +
+        'Consider increasing the maxDepth option if this is expected.',
+    );
+  }
 
   return { ast };
 }
@@ -38,6 +57,8 @@ export function parseMarkdown(content: string, options?: ParserOptions): ParseRe
  * ```
  */
 export async function parseFile(filePath: string, options?: ParserOptions): Promise<ParseResult> {
+  const maxFileSize = options?.maxFileSize ?? DEFAULT_MAX_FILE_SIZE;
+
   // Check file exists first for better error messages
   try {
     await access(filePath);
@@ -45,14 +66,62 @@ export async function parseFile(filePath: string, options?: ParserOptions): Prom
     throw new ParserError('FILE_NOT_FOUND', `File not found: ${filePath}`, filePath);
   }
 
-  // Read file content
+  // Check file size before reading
+  let fileSize: number;
+  try {
+    const stats = await stat(filePath);
+    fileSize = stats.size;
+    if (fileSize > maxFileSize) {
+      throw new ParserError(
+        'FILE_TOO_LARGE',
+        `File size (${formatFileSize(fileSize)}) exceeds maximum allowed size (${formatFileSize(maxFileSize)})`,
+        filePath,
+      );
+    }
+  } catch (error) {
+    if (error instanceof ParserError) {
+      throw error;
+    }
+    const message = error instanceof Error ? error.message : 'Unknown stat error';
+    throw new ParserError('FILE_READ_ERROR', `Failed to read file stats: ${message}`, filePath);
+  }
+
+  // Read file content as buffer first for validation
+  let buffer: Buffer;
   let content: string;
   try {
-    content = await readFile(filePath, 'utf-8');
+    buffer = await readFile(filePath);
+
+    // Validate UTF-8 encoding before converting to string
+    if (!isValidUtf8(buffer)) {
+      throw new ParserError(
+        'ENCODING_ERROR',
+        'File contains invalid UTF-8 byte sequences',
+        filePath,
+      );
+    }
+
+    // Convert to string
+    content = buffer.toString('utf-8');
   } catch (error) {
+    if (error instanceof ParserError) {
+      throw error;
+    }
     const message = error instanceof Error ? error.message : 'Unknown read error';
     throw new ParserError('FILE_READ_ERROR', `Failed to read file: ${message}`, filePath);
   }
+
+  // Check for binary content
+  if (isLikelyBinary(content)) {
+    throw new ParserError(
+      'BINARY_FILE',
+      'File appears to be binary content rather than text markdown',
+      filePath,
+    );
+  }
+
+  // Normalize line endings
+  content = sanitizeInput(content);
 
   // Parse the content
   const result = parseMarkdown(content, options);

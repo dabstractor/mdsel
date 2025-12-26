@@ -9,6 +9,7 @@ import type {
   ResolutionContext
 } from './types.js';
 import { SuggestionEngine } from './suggestions.js';
+import { DEFAULT_MAX_DEPTH } from '../utils/validation.js';
 
 /**
  * Internal result type for path segment resolution.
@@ -141,6 +142,7 @@ function resolvePathSegments(
   let currentNode = context.currentNode;
   const path = [...context.path];
   const partialResults: ResolutionResult[] = [];
+  const maxDepth = DEFAULT_MAX_DEPTH;
 
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
@@ -153,6 +155,17 @@ function resolvePathSegments(
       };
     }
     context.segmentIndex = i;
+
+    // Check depth limit before processing segment
+    if (i >= maxDepth) {
+      return {
+        success: false,
+        errorType: 'SELECTOR_NOT_FOUND',
+        errorMessage: `Selector depth ${i + 1} exceeds maximum of ${maxDepth}`,
+        failedAtSegment: i,
+        partialResults
+      };
+    }
 
     // Handle root segment specially
     if (segment.nodeType === 'root') {
@@ -227,7 +240,7 @@ function resolvePathSegments(
  * among siblings of the same type.
  */
 function findMatchingChildren(parent: any, segment: PathSegmentNode): any[] {
-  if (!parent || !parent.children || !Array.isArray(parent.children)) {
+  if (!parent?.children || !Array.isArray(parent.children)) {
     return [];
   }
 
@@ -236,7 +249,7 @@ function findMatchingChildren(parent: any, segment: PathSegmentNode): any[] {
   switch (segment.nodeType) {
     case 'heading':
       // Match heading by level (depth)
-      if (segment.subtype && segment.subtype.startsWith('h')) {
+      if (segment.subtype?.startsWith('h')) {
         const depth = parseInt(segment.subtype.slice(1), 10);
         for (const child of parent.children) {
           if (child.type === 'heading' && child.depth === depth) {
@@ -298,7 +311,7 @@ function estimateWordCount(node: any): number {
  * Check if node has children available for further selection.
  */
 function hasChildren(node: any): boolean {
-  return node && node.children && Array.isArray(node.children) && node.children.length > 0;
+  return node?.children && Array.isArray(node.children) && node.children.length > 0;
 }
 
 /**

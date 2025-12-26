@@ -643,21 +643,21 @@
           "type": "Milestone",
           "id": "P3.M2",
           "title": "JSON Output Formatter",
-          "status": "Planned",
+          "status": "Complete",
           "description": "Format responses according to output schema.",
           "tasks": [
             {
               "type": "Task",
               "id": "P3.M2.T1",
               "title": "Implement Output Types",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Define TypeScript interfaces for all output formats.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M2.T1.S1",
                   "title": "Define output schema types",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M1.T2.S2"
@@ -670,14 +670,14 @@
               "type": "Task",
               "id": "P3.M2.T2",
               "title": "Implement Response Formatters",
-              "status": "Planned",
+              "status": "Complete",
               "description": "Build response objects for index and select commands.",
               "subtasks": [
                 {
                   "type": "Subtask",
                   "id": "P3.M2.T2.S1",
                   "title": "Implement index response formatter",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M2.T1.S1"
@@ -688,7 +688,7 @@
                   "type": "Subtask",
                   "id": "P3.M2.T2.S2",
                   "title": "Implement select response formatter",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 2,
                   "dependencies": [
                     "P3.M2.T2.S1"
@@ -699,7 +699,7 @@
                   "type": "Subtask",
                   "id": "P3.M2.T2.S3",
                   "title": "Implement error response formatter",
-                  "status": "Planned",
+                  "status": "Complete",
                   "story_points": 1,
                   "dependencies": [
                     "P3.M2.T2.S2"
