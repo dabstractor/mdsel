@@ -13,6 +13,9 @@ export enum TokenType {
   // Separators and operators
   NAMESPACE_SEP = 'NAMESPACE_SEP', // ::
   COLON = 'COLON', // :
+  DOT = 'DOT', // .
+  HYPHEN = 'HYPHEN', // -
+  COMMA = 'COMMA', // ,
   SLASH = 'SLASH', // /
   QUESTION = 'QUESTION', // ?
   AMPERSAND = 'AMPERSAND', // &
@@ -85,12 +88,13 @@ export interface SelectorAST extends BaseSelectorNode {
 
 /**
  * Path segment node (heading:h2[1], block:code[0], etc).
+ * Supports single index, range (via array), or multiple indices.
  */
 export interface PathSegmentNode extends BaseSelectorNode {
   type: SelectorNodeType.PATH_SEGMENT;
   nodeType: 'root' | 'heading' | 'section' | 'block' | 'page';
   subtype?: HeadingLevel | BlockType;
-  index?: number;
+  index?: number | number[];
   position: Position;
 }
 

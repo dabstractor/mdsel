@@ -314,7 +314,7 @@ describe('parseSelector', () => {
         expect(error).toBeInstanceOf(SelectorParseError);
         if (error instanceof SelectorParseError) {
           expect(error.code).toBe('INVALID_SYNTAX');
-          expect(error.message).toContain('node type');
+          expect(error.message).toContain('Unknown selector');
         }
       }
     });

@@ -120,6 +120,18 @@ export function tokenize(input: string): Token[] {
         advance();
         addToken(TokenType.COLON, ':', pos);
         continue;
+      case '.':
+        advance();
+        addToken(TokenType.DOT, '.', pos);
+        continue;
+      case '-':
+        advance();
+        addToken(TokenType.HYPHEN, '-', pos);
+        continue;
+      case ',':
+        advance();
+        addToken(TokenType.COMMA, ',', pos);
+        continue;
       case '[':
         advance();
         addToken(TokenType.OPEN_BRACKET, '[', pos);

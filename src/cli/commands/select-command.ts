@@ -2,6 +2,7 @@
  * Select command implementation for CLI.
  *
  * Resolves selectors against markdown files and outputs matching content.
+ * Default output is minimal text; use --json for JSON format.
  *
  * @module cli/commands/select-command
  */
@@ -13,6 +14,7 @@ import { parseFile, ParserError } from '../../parser/index.js';
 import { parseSelector, SelectorParseError } from '../../selector/index.js';
 import { resolveMulti, type DocumentTree } from '../../resolver/index.js';
 import { formatSelectResponse, formatErrorResponse, createErrorEntry } from '../../output/index.js';
+import { formatSelectText, formatErrorText } from '../../output/text-formatters.js';
 import { deriveNamespace } from '../utils/namespace.js';
 import { buildAvailableSelectors } from '../utils/selector-builder.js';
 import { extractMarkdown, truncateContent } from '../utils/content-extractor.js';
@@ -24,13 +26,16 @@ import { ExitCode, exitWithCode } from '../utils/exit-codes.js';
 export interface SelectOptions {
   /** Bypass truncation and return full content */
   full?: boolean;
+  /** Output JSON instead of text */
+  json?: boolean;
 }
 
 /**
  * Execute the select command.
  *
  * Parses the selector, resolves it against the specified documents,
- * and outputs a JSON response containing the matched content.
+ * and outputs the matched content.
+ * Default output is minimal text; use --json for JSON format.
  *
  * @param selector - The selector string to resolve
  * @param files - Array of file paths to search
@@ -40,7 +45,7 @@ export interface SelectOptions {
  * ```bash
  * mdsel select "readme::heading:h1[0]" README.md
  * mdsel select "heading:h2[0]" README.md CONTRIBUTING.md
- * mdsel select "docs::section[5]?full=true" docs.md --full
+ * mdsel --json select "docs::section[5]?full=true" docs.md --full
  * ```
  */
 export async function selectCommand(
@@ -48,6 +53,8 @@ export async function selectCommand(
   files: string[],
   options: SelectOptions = {},
 ): Promise<void> {
+  const useJson = options.json === true;
+
   // Validate files
   if (files.length === 0) {
     const error = createErrorEntry(
@@ -55,7 +62,7 @@ export async function selectCommand(
       'NO_FILES',
       'No files provided. Specify files to search.',
     );
-    console.log(JSON.stringify(formatErrorResponse('select', [error])));
+    outputError([error], useJson);
     exitWithCode(ExitCode.ERROR);
     return;
   }
@@ -73,7 +80,7 @@ export async function selectCommand(
         undefined,
         selector,
       );
-      console.log(JSON.stringify(formatErrorResponse('select', [errorEntry])));
+      outputError([errorEntry], useJson);
       exitWithCode(ExitCode.ERROR);
       return;
     }
@@ -117,7 +124,7 @@ export async function selectCommand(
 
   // If no documents could be parsed, return error
   if (documents.length === 0) {
-    console.log(JSON.stringify(formatErrorResponse('select', parseErrors)));
+    outputError(parseErrors, useJson);
     exitWithCode(ExitCode.ERROR);
     return;
   }
@@ -128,25 +135,53 @@ export async function selectCommand(
   // Format response based on outcome
   if (outcome.success) {
     const matches = formatMatches(outcome.results, isFull);
-    const response = formatSelectResponse(matches, []);
-    console.log(JSON.stringify(response));
+    if (useJson) {
+      const response = formatSelectResponse(matches, []);
+      console.log(JSON.stringify(response));
+    } else {
+      console.log(formatSelectText(matches, []));
+    }
     exitWithCode(ExitCode.SUCCESS);
     return;
   }
 
   // Selector resolution failed
-  const error = outcome.error;
+  const err = outcome.error;
   const unresolved = [
     {
-      selector: error.selector,
-      reason: error.message,
-      suggestions: error.suggestions.map((s) => s.selector),
+      selector: err.selector,
+      reason: err.message,
+      suggestions: err.suggestions.map((s) => s.selector),
     },
   ];
-  const response = formatSelectResponse([], unresolved);
-  console.log(JSON.stringify(response));
+  if (useJson) {
+    const response = formatSelectResponse([], unresolved);
+    console.log(JSON.stringify(response));
+  } else {
+    console.log(formatSelectText([], unresolved));
+  }
   exitWithCode(ExitCode.ERROR);
 }
+
+/**
+ * Output error in appropriate format.
+ */
+function outputError(errors: ErrorEntry[], useJson: boolean): void {
+  if (useJson) {
+    console.log(JSON.stringify(formatErrorResponse('select', errors)));
+  } else {
+    console.log(formatErrorText(errors));
+  }
+}
+
+// Block types that are selectable (map mdast type to selector shorthand)
+const SELECTABLE_BLOCKS: Record<string, string> = {
+  paragraph: 'para',
+  code: 'code',
+  list: 'list',
+  table: 'table',
+  blockquote: 'quote',
+};
 
 /**
  * Format resolution results into SelectMatch objects.
@@ -155,17 +190,44 @@ function formatMatches(results: ResolutionResult[], isFull: boolean): SelectMatc
   return results.map((result) => {
     const { content, truncated } = truncateContent(extractMarkdown(result.node), { full: isFull });
 
-    // Build children_available list
+    // Build children_available list - only include selectable block types
     const childrenAvailable: ChildInfo[] = [];
     if (result.childrenAvailable && result.node.children) {
+      // Track counts per type for indexing
+      const typeCounts: Record<string, number> = {};
+
       for (const child of result.node.children) {
-        const childText = extractMarkdown(child);
-        const childPreview = childText.slice(0, 80);
-        childrenAvailable.push({
-          selector: `${String(result.selector)}/${String(child.type)}`,
-          type: String(child.type),
-          preview: childPreview,
-        });
+        const childType = String(child.type);
+
+        // Check if it's a heading
+        if (childType === 'heading' && 'depth' in child) {
+          const level = `h${child.depth as number}`;
+          const idx = typeCounts[level] ?? 0;
+          typeCounts[level] = idx + 1;
+
+          const childText = extractMarkdown(child);
+          const childPreview = childText.slice(0, 80).replace(/^#+\s*/, '');
+          childrenAvailable.push({
+            selector: `${level}[${idx}]`,
+            type: 'heading',
+            preview: childPreview,
+          });
+        }
+        // Check if it's a selectable block
+        else if (childType in SELECTABLE_BLOCKS) {
+          const shorthand = SELECTABLE_BLOCKS[childType];
+          const idx = typeCounts[shorthand] ?? 0;
+          typeCounts[shorthand] = idx + 1;
+
+          const childText = extractMarkdown(child);
+          const childPreview = childText.slice(0, 80);
+          childrenAvailable.push({
+            selector: `${shorthand}[${idx}]`,
+            type: childType,
+            preview: childPreview,
+          });
+        }
+        // Skip inline types (text, emphasis, strong, link, etc.)
       }
     }
 

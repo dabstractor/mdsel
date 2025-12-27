@@ -64,7 +64,7 @@ describe('exit-codes', () => {
   describe('index command exit codes', () => {
     it('should exit with 0 on success', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
-      const result = await runCliCommand(['index', join(fixturesDir, 'simple.md')]);
+      const result = await runCliCommand(['--json', 'index', join(fixturesDir, 'simple.md')]);
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout).toBeTruthy();
@@ -78,7 +78,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on FILE_NOT_FOUND error', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const missingFile = join(fixturesDir, 'missing.md');
-      const result = await runCliCommand(['index', missingFile]);
+      const result = await runCliCommand(['--json', 'index', missingFile]);
 
       expect(result.exitCode).toBe(1);
       expect(result.stdout).toBeTruthy();
@@ -92,6 +92,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on partial success', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'index',
         join(fixturesDir, 'simple.md'),
         join(fixturesDir, 'missing.md'),
@@ -108,6 +109,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on complete failure', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'index',
         join(fixturesDir, 'missing1.md'),
         join(fixturesDir, 'missing2.md'),
@@ -134,6 +136,7 @@ describe('exit-codes', () => {
     it('should exit with 0 on success', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         `simple::heading:h1[0]`,
         join(fixturesDir, 'simple.md'),
@@ -151,6 +154,7 @@ describe('exit-codes', () => {
     it('should exit with 0 on multiple successful matches', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         'heading:h1[0]',
         join(fixturesDir, 'simple.md'),
@@ -168,6 +172,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on invalid selector', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         'invalid::selector::format',
         join(fixturesDir, 'simple.md'),
@@ -184,6 +189,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on unresolved selector', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         `simple::heading:h1[99]`, // Out of range
         join(fixturesDir, 'simple.md'),
@@ -200,6 +206,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on FILE_NOT_FOUND when file does not exist', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         'heading:h1[0]',
         join(fixturesDir, 'missing.md'),
@@ -214,7 +221,7 @@ describe('exit-codes', () => {
     });
 
     it('should exit with 1 when no files provided', async () => {
-      const result = await runCliCommand(['select', 'heading:h1[0]']);
+      const result = await runCliCommand(['--json', 'select', 'heading:h1[0]']);
 
       expect(result.exitCode).toBe(1);
       expect(result.stdout).toBeTruthy();
@@ -228,6 +235,7 @@ describe('exit-codes', () => {
     it('should exit with 1 on mixed valid and invalid files', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         'heading:h1[0]',
         join(fixturesDir, 'simple.md'),
@@ -246,6 +254,7 @@ describe('exit-codes', () => {
     it('should exit with 1 when selector matches nothing', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
       const result = await runCliCommand([
+        '--json',
         'select',
         'heading:h6[0]', // No h6 in fixtures
         join(fixturesDir, 'simple.md'),
@@ -286,7 +295,7 @@ describe('exit-codes', () => {
     });
 
     it('should handle malformed arguments', async () => {
-      const result = await runCliCommand(['select', '', 'simple.md']);
+      const result = await runCliCommand(['--json', 'select', '', 'simple.md']);
 
       expect(result.exitCode).toBe(1);
       expect(result.stdout).toBeTruthy();
@@ -300,7 +309,7 @@ describe('exit-codes', () => {
   describe('timeout behavior', () => {
     it('should handle large files without timing out', async () => {
       const fixturesDir = join(process.cwd(), 'tests', 'fixtures');
-      const result = await runCliCommand(['index', join(fixturesDir, 'complex.md')]);
+      const result = await runCliCommand(['--json', 'index', join(fixturesDir, 'complex.md')]);
 
       // Should complete quickly
       expect(result.exitCode).toBe(0);

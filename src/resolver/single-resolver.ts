@@ -16,8 +16,7 @@ import { DEFAULT_MAX_DEPTH } from '../utils/validation.js';
  */
 interface SegmentResolutionSuccess {
   success: true;
-  node: any;
-  path: any[];
+  nodes: Array<{ node: any; path: any[] }>; // Multiple nodes when no index specified
 }
 
 interface SegmentResolutionFailure {
@@ -77,18 +76,23 @@ export function resolveSingle(
     const result = resolvePathSegments(context, selector.segments);
 
     if (result.success) {
-      const resolutionResult: ResolutionResult = {
+      // Get actual indices from the selector's last segment
+      const lastSeg = selector.segments[selector.segments.length - 1];
+      const indices = Array.isArray(lastSeg?.index) ? lastSeg.index : undefined;
+
+      // Build results for all matched nodes
+      const results: ResolutionResult[] = result.nodes.map(({ node, path }, idx) => ({
         namespace,
-        node: result.node,
-        selector: selectorToString(selector),
-        path: result.path,
-        wordCount: estimateWordCount(result.node),
-        childrenAvailable: hasChildren(result.node),
-      };
+        node,
+        selector: selectorToString(selector, indices?.[idx]),
+        path,
+        wordCount: estimateWordCount(node),
+        childrenAvailable: hasChildren(node),
+      }));
 
       return {
         success: true,
-        results: [resolutionResult],
+        results,
       };
     } else {
       // Generate suggestions for failed resolution
@@ -133,14 +137,14 @@ export function resolveSingle(
  * Resolve path segments against the tree.
  *
  * Processes each segment sequentially, narrowing the search scope
- * with each successful match.
+ * with each successful match. When no index is specified on the final
+ * segment, returns ALL matches.
  */
 function resolvePathSegments(
   context: ResolutionContext,
   segments: PathSegmentNode[],
 ): SegmentResolutionOutcome {
-  let currentNode = context.currentNode;
-  const path = [...context.path];
+  let currentNodes: Array<{ node: any; path: any[] }> = [{ node: context.currentNode, path: [...context.path] }];
   const partialResults: ResolutionResult[] = [];
   const maxDepth = DEFAULT_MAX_DEPTH;
 
@@ -155,6 +159,7 @@ function resolvePathSegments(
       };
     }
     context.segmentIndex = i;
+    const isLastSegment = i === segments.length - 1;
 
     // Check depth limit before processing segment
     if (i >= maxDepth) {
@@ -170,7 +175,7 @@ function resolvePathSegments(
     // Handle root segment specially
     if (segment.nodeType === 'root') {
       // Root is the starting point - don't search, validate and continue
-      if (currentNode.type !== 'root') {
+      if (currentNodes[0]?.node.type !== 'root') {
         return {
           success: false,
           errorType: 'SELECTOR_NOT_FOUND',
@@ -179,11 +184,13 @@ function resolvePathSegments(
         };
       }
       // Root matches the current node, continue to next segment
-      path.push(currentNode);
+      currentNodes = currentNodes.map(({ node, path }) => ({ node, path: [...path, node] }));
       continue;
     }
 
-    // Find matching children for current segment
+    // Find matching children for current segment (from first current node)
+    const currentNode = currentNodes[0]?.node;
+    const currentPath = currentNodes[0]?.path ?? [];
     const matches = findMatchingChildren(currentNode, segment);
 
     if (matches.length === 0) {
@@ -196,40 +203,50 @@ function resolvePathSegments(
       };
     }
 
-    // Apply index if specified
-    let selectedIndex = 0;
+    // Apply index if specified, otherwise return all on last segment
     if (segment.index !== undefined) {
-      if (segment.index >= matches.length) {
+      const indices = Array.isArray(segment.index) ? segment.index : [segment.index];
+
+      // Validate all indices are in range
+      const maxIndex = Math.max(...indices);
+      if (maxIndex >= matches.length) {
         const subtype = segment.subtype ? ':' + segment.subtype : '';
         return {
           success: false,
           errorType: 'INDEX_OUT_OF_RANGE',
-          errorMessage: `Index ${segment.index} out of range (only ${matches.length} ${segment.nodeType}${subtype}(s) found)`,
+          errorMessage: `Index ${maxIndex} out of range (only ${matches.length} ${segment.nodeType}${subtype}(s) found)`,
           failedAtSegment: i,
           partialResults,
         };
       }
-      selectedIndex = segment.index;
-    }
 
-    currentNode = matches[selectedIndex];
-    path.push(currentNode);
+      // Select all specified indices
+      currentNodes = indices.map((idx) => {
+        const selected = matches[idx];
+        return { node: selected, path: [...currentPath, selected] };
+      });
+    } else if (isLastSegment) {
+      // No index on last segment: return ALL matches
+      currentNodes = matches.map((m) => ({ node: m, path: [...currentPath, m] }));
+    } else {
+      // No index on intermediate segment: default to first
+      currentNodes = [{ node: matches[0], path: [...currentPath, matches[0]] }];
+    }
 
     // Track partial results for error recovery
     partialResults.push({
       namespace: context.namespace,
-      node: currentNode,
+      node: currentNodes[0]?.node,
       selector: segmentToString(segment),
-      path: [...path],
-      wordCount: estimateWordCount(currentNode),
-      childrenAvailable: hasChildren(currentNode),
+      path: currentNodes[0]?.path ?? [],
+      wordCount: estimateWordCount(currentNodes[0]?.node),
+      childrenAvailable: hasChildren(currentNodes[0]?.node),
     });
   }
 
   return {
     success: true,
-    node: currentNode,
-    path,
+    nodes: currentNodes,
   };
 }
 
@@ -238,6 +255,9 @@ function resolvePathSegments(
  *
  * Returns an array of matching nodes, indexed by their position
  * among siblings of the same type.
+ *
+ * For headings, returns synthetic section nodes containing the heading
+ * and all content until the next heading of equal or higher level.
  */
 function findMatchingChildren(parent: any, segment: PathSegmentNode): any[] {
   if (!parent?.children || !Array.isArray(parent.children)) {
@@ -248,12 +268,33 @@ function findMatchingChildren(parent: any, segment: PathSegmentNode): any[] {
 
   switch (segment.nodeType) {
     case 'heading':
-      // Match heading by level (depth)
+      // Match heading by level (depth) and extract section content
       if (segment.subtype?.startsWith('h')) {
         const depth = parseInt(segment.subtype.slice(1), 10);
-        for (const child of parent.children) {
+        const children = parent.children;
+
+        for (let i = 0; i < children.length; i++) {
+          const child = children[i];
           if (child.type === 'heading' && child.depth === depth) {
-            matches.push(child);
+            // Build section: heading + content until next heading of same/higher level
+            const sectionChildren: any[] = [child];
+
+            for (let j = i + 1; j < children.length; j++) {
+              const sibling = children[j];
+              // Stop at heading of same or higher level (lower depth number)
+              if (sibling.type === 'heading' && sibling.depth <= depth) {
+                break;
+              }
+              sectionChildren.push(sibling);
+            }
+
+            // Return synthetic section node
+            matches.push({
+              type: 'section',
+              depth,
+              children: sectionChildren,
+              position: child.position,
+            });
           }
         }
       }
@@ -319,15 +360,23 @@ function hasChildren(node: any): boolean {
 
 /**
  * Convert selector AST back to string (for error messages).
+ * If resultIndex is provided, overrides the last segment's index.
  */
-function selectorToString(selector: SelectorAST): string {
+function selectorToString(selector: SelectorAST, resultIndex?: number): string {
   let result = '';
 
   if (selector.namespace) {
     result += `${selector.namespace}::`;
   }
 
-  result += selector.segments.map(segmentToString).join('/');
+  result += selector.segments.map((seg, i) => {
+    const isLast = i === selector.segments.length - 1;
+    // If resultIndex provided, use it for the last segment instead of the segment's index
+    if (isLast && resultIndex !== undefined) {
+      return segmentToStringWithIndex(seg, resultIndex);
+    }
+    return segmentToString(seg);
+  }).join('/');
 
   if (selector.queryParams && selector.queryParams.length > 0) {
     const params = selector.queryParams.map((p) => `${p.key}=${p.value}`).join('&');
@@ -338,7 +387,20 @@ function selectorToString(selector: SelectorAST): string {
 }
 
 /**
+ * Convert segment to string with a specific index override.
+ */
+function segmentToStringWithIndex(segment: PathSegmentNode, index: number): string {
+  let segStr = segment.nodeType;
+  if (segment.subtype) {
+    segStr += `:${segment.subtype}`;
+  }
+  segStr += `.${index}`;
+  return segStr;
+}
+
+/**
  * Convert single path segment to string.
+ * Handles both single indices and index arrays.
  */
 function segmentToString(segment: PathSegmentNode): string {
   let segStr = segment.nodeType;
@@ -346,7 +408,12 @@ function segmentToString(segment: PathSegmentNode): string {
     segStr += `:${segment.subtype}`;
   }
   if (segment.index !== undefined) {
-    segStr += `[${segment.index}]`;
+    const idx = segment.index;
+    if (Array.isArray(idx)) {
+      segStr += `.${idx.join(',')}`;
+    } else {
+      segStr += `.${idx}`;
+    }
   }
   return segStr;
 }

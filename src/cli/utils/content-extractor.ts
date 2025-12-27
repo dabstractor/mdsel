@@ -9,10 +9,11 @@
 
 import { toString } from 'mdast-util-to-string';
 import { toMarkdown } from 'mdast-util-to-markdown';
+import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { Root, RootContent } from 'mdast';
 
-/** Maximum words before truncation (default) */
-const MAX_WORDS = 500;
+/** Maximum words before truncation (disabled by default) */
+const MAX_WORDS = Infinity;
 
 /** Default preview length in characters */
 const PREVIEW_LENGTH = 80;
@@ -40,6 +41,8 @@ export interface TruncatedContent {
 /**
  * Extract markdown string from an mdast node.
  *
+ * Handles synthetic section nodes by wrapping children in a root.
+ *
  * @param node - The mdast node to convert
  * @returns Markdown string with trailing whitespace trimmed
  *
@@ -49,8 +52,33 @@ export interface TruncatedContent {
  * // "## Installation"
  * ```
  */
-export function extractMarkdown(node: ContentNode): string {
-  return toMarkdown(node).trimEnd();
+export function extractMarkdown(node: ContentNode | SectionNode): string {
+  // Handle synthetic section nodes created by heading selector
+  if (isSectionNode(node)) {
+    const root: Root = { type: 'root', children: node.children };
+    return toMarkdown(root, { extensions: [gfmToMarkdown()] }).trimEnd();
+  }
+  return toMarkdown(node, { extensions: [gfmToMarkdown()] }).trimEnd();
+}
+
+/**
+ * Synthetic section node type (heading + content below it).
+ */
+interface SectionNode {
+  type: 'section';
+  depth: number;
+  children: RootContent[];
+  position?: unknown;
+}
+
+function isSectionNode(node: unknown): node is SectionNode {
+  return (
+    typeof node === 'object' &&
+    node !== null &&
+    'type' in node &&
+    (node as { type: unknown }).type === 'section' &&
+    'children' in node
+  );
 }
 
 /**
@@ -136,10 +164,19 @@ export function truncateContent(
     return { content, truncated: false, wordCount };
   }
 
-  // Truncate at word boundary
-  const words = content.trim().split(/\s+/);
-  const truncatedWords = words.slice(0, MAX_WORDS);
-  const truncatedContent = truncatedWords.join(' ') + ' ' + TRUNCATION_MARKER;
+  // Truncate at word boundary while preserving newlines
+  let words = 0;
+  let endPos = 0;
+  const wordRegex = /\S+/g;
+  let match;
+
+  while ((match = wordRegex.exec(content)) !== null) {
+    words++;
+    if (words > MAX_WORDS) break;
+    endPos = match.index + match[0].length;
+  }
+
+  const truncatedContent = content.slice(0, endPos) + '\n' + TRUNCATION_MARKER;
 
   return {
     content: truncatedContent,

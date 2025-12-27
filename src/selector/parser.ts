@@ -15,6 +15,17 @@ import { tokenize } from './tokenizer.js';
 const validHeadingLevels: HeadingLevel[] = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'];
 const validBlockTypes: BlockType[] = ['paragraph', 'list', 'code', 'table', 'blockquote'];
 
+// Shorthand aliases for block types
+const blockAliases: Record<string, BlockType> = {
+  para: 'paragraph',
+  paragraph: 'paragraph',
+  list: 'list',
+  code: 'code',
+  table: 'table',
+  quote: 'blockquote',
+  blockquote: 'blockquote',
+};
+
 /**
  * Parses a selector string into an AST.
  *
@@ -166,27 +177,57 @@ class Parser {
     } else if (this.match(TokenType.PAGE)) {
       nodeType = 'page';
     } else if (this.check(TokenType.IDENTIFIER)) {
+      // Check for shorthand forms: h1, h2, code, para, etc.
+      const identValue = this.peek().value;
+
+      // Check if it's a heading shorthand (h1-h6)
+      if (validHeadingLevels.includes(identValue as HeadingLevel)) {
+        this.advance();
+        nodeType = 'heading';
+        subtype = identValue as HeadingLevel;
+      }
+      // Check if it's a block shorthand (code, para, list, table, quote)
+      else if (identValue in blockAliases) {
+        this.advance();
+        nodeType = 'block';
+        subtype = blockAliases[identValue];
+      }
       // Unknown identifier
-      throw new SelectorParseError(
-        'INVALID_SYNTAX',
-        `Unexpected identifier '${this.peek().value}' - expected node type (root, heading, section, block, or page)`,
-        this.peek().position,
-        this.input,
-      );
+      else {
+        throw new SelectorParseError(
+          'INVALID_SYNTAX',
+          `Unknown selector '${identValue}' - use h1-h6, code, para, list, table, quote, root, or section`,
+          this.peek().position,
+          this.input,
+        );
+      }
     } else if (this.check(TokenType.SLASH) || this.check(TokenType.EOF)) {
       throw this.error(
         'INVALID_SYNTAX',
-        'Expected path segment (root, heading, section, block, or page)',
+        'Expected selector type',
       );
     } else {
       throw this.error(
         'INVALID_SYNTAX',
-        `Expected node type (root, heading, section, block, or page)`,
+        `Expected selector type`,
       );
     }
 
-    // Parse optional index [number]
-    if (this.match(TokenType.OPEN_BRACKET)) {
+    // Parse optional index: .N or [N] with optional range (-) or comma (,) support
+    if (this.match(TokenType.DOT)) {
+      if (!this.check(TokenType.NUMBER)) {
+        throw this.error('INVALID_INDEX', `Expected number after '.'`);
+      }
+      const indexToken = this.advance();
+      const numValue = parseInt(indexToken.value, 10);
+      if (numValue < 0) {
+        throw this.error('INVALID_INDEX', `Index must be non-negative`);
+      }
+      index = numValue;
+
+      // Check for range syntax: .1-2 or comma list: .1,3
+      index = this.parseIndexList(numValue);
+    } else if (this.match(TokenType.OPEN_BRACKET)) {
       if (!this.check(TokenType.NUMBER)) {
         throw this.error('INVALID_INDEX', `Expected number inside brackets`);
       }
@@ -196,6 +237,9 @@ class Parser {
         throw this.error('INVALID_INDEX', `Index must be non-negative`);
       }
       index = numValue;
+
+      // Check for range syntax: [1-2] or comma list: [1,3]
+      index = this.parseIndexList(numValue);
 
       if (!this.match(TokenType.CLOSE_BRACKET)) {
         throw this.error('UNCLOSED_BRACKET', `Unclosed bracket, expected ']'`);
@@ -209,6 +253,51 @@ class Parser {
       index,
       position: startPos,
     };
+  }
+
+  /**
+   * Parse index list after initial number.
+   * Supports:
+   * - Single: 1 → returns 1
+   * - Range: 1-3 → returns [1, 2, 3]
+   * - Comma list: 1,3,5 → returns [1, 3, 5]
+   */
+  private parseIndexList(firstIndex: number): number | number[] {
+    const indices = [firstIndex];
+
+    while (true) {
+      if (this.match(TokenType.HYPHEN)) {
+        // Range syntax: 1-3
+        if (!this.check(TokenType.NUMBER)) {
+          throw this.error('INVALID_INDEX', `Expected number after '-' for range`);
+        }
+        const endToken = this.advance();
+        const endIndex = parseInt(endToken.value, 10);
+        if (endIndex < firstIndex) {
+          throw this.error('INVALID_INDEX', `Range end must be >= start`);
+        }
+        // Expand range
+        for (let i = firstIndex + 1; i <= endIndex; i++) {
+          indices.push(i);
+        }
+        break; // Range is terminal
+      } else if (this.match(TokenType.COMMA)) {
+        // Comma list: 1,3,5
+        if (!this.check(TokenType.NUMBER)) {
+          throw this.error('INVALID_INDEX', `Expected number after ','`);
+        }
+        const nextToken = this.advance();
+        const nextIndex = parseInt(nextToken.value, 10);
+        indices.push(nextIndex);
+        // Continue to check for more commas or hyphen
+      } else {
+        // No more tokens, return what we have
+        break;
+      }
+    }
+
+    // Single index returns as number, multiple as array
+    return indices.length === 1 ? indices[0] : indices;
   }
 
   private parseQueryParams(): QueryParam[] {

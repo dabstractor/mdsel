@@ -1,7 +1,8 @@
 /**
  * Index command implementation for CLI.
  *
- * Parses markdown files and emits selector inventory as JSON.
+ * Parses markdown files and emits selector inventory.
+ * Default output is minimal text; use --json for JSON format.
  *
  * @module cli/commands/index-command
  */
@@ -9,32 +10,47 @@
 import type { DocumentIndex, IndexSummary, ErrorEntry, CLIResponse } from '../../output/types.js';
 import { parseFile, ParserError, parseMarkdown } from '../../parser/index.js';
 import { formatIndexResponse, formatErrorResponse, createErrorEntry } from '../../output/index.js';
+import { formatIndexText, formatErrorText } from '../../output/text-formatters.js';
 import { deriveNamespace } from '../utils/namespace.js';
 import { buildDocumentIndex } from '../utils/selector-builder.js';
 import { isStdinPiped, readStdin } from '../utils/file-reader.js';
 import { ExitCode, exitWithCode } from '../utils/exit-codes.js';
 
 /**
+ * Options for the index command.
+ */
+export interface IndexOptions {
+  /** Output JSON instead of text */
+  json?: boolean;
+}
+
+/**
  * Execute the index command.
  *
- * Parses the specified markdown files and outputs a JSON response
- * containing the selector inventory for each document.
+ * Parses the specified markdown files and outputs the selector inventory.
+ * Default output is minimal text; use --json for JSON format.
  *
  * @param files - Array of file paths to index
+ * @param options - Command options
  *
  * @example
  * ```bash
  * mdsel index README.md
  * mdsel index README.md CONTRIBUTING.md
+ * mdsel --json index README.md
  * ```
  */
-export async function indexCommand(files: string[]): Promise<void> {
+export async function indexCommand(
+  files: string[],
+  options: IndexOptions = {},
+): Promise<void> {
   const documents: DocumentIndex[] = [];
   const errors: ErrorEntry[] = [];
+  const useJson = options.json === true;
 
   // Handle stdin if no files provided and stdin is piped
   if (files.length === 0 && isStdinPiped()) {
-    await indexStdin();
+    await indexStdin(useJson);
     return;
   }
 
@@ -45,7 +61,7 @@ export async function indexCommand(files: string[]): Promise<void> {
       'NO_FILES',
       'No files provided. Specify files to index or pipe content via stdin.',
     );
-    console.log(JSON.stringify(formatErrorResponse('index', [error])));
+    outputError([error], useJson);
     exitWithCode(ExitCode.ERROR);
     return;
   }
@@ -75,7 +91,7 @@ export async function indexCommand(files: string[]): Promise<void> {
 
   // Handle complete failure
   if (documents.length === 0 && errors.length > 0) {
-    console.log(JSON.stringify(formatErrorResponse('index', errors)));
+    outputError(errors, useJson);
     exitWithCode(ExitCode.ERROR);
     return;
   }
@@ -83,33 +99,54 @@ export async function indexCommand(files: string[]): Promise<void> {
   // Handle partial success
   if (errors.length > 0) {
     const summary = calculateSummary(documents);
-    const response = formatErrorResponse(
-      'index',
-      errors,
-      documents as unknown[], // Using unknown[] as safe conversion
-    ) as CLIResponse; // Cast to access optional fields
-    // Add partial results to response
-    response.partial_results = documents as unknown[];
-    response.data = { documents, summary } as unknown;
-    response.warnings = [
-      `${String(errors.length)} of ${String(files.length)} file(s) could not be processed`,
-    ];
-    console.log(JSON.stringify(response));
-    exitWithCode(ExitCode.ERROR); // Still exit with error code for partial success
+    if (useJson) {
+      const response = formatErrorResponse(
+        'index',
+        errors,
+        documents as unknown[],
+      ) as CLIResponse;
+      response.partial_results = documents as unknown[];
+      response.data = { documents, summary } as unknown;
+      response.warnings = [
+        `${String(errors.length)} of ${String(files.length)} file(s) could not be processed`,
+      ];
+      console.log(JSON.stringify(response));
+    } else {
+      // Text output: show what succeeded, then errors
+      console.log(formatIndexText(documents));
+      console.log('');
+      console.log(formatErrorText(errors));
+    }
+    exitWithCode(ExitCode.ERROR);
     return;
   }
 
   // Complete success
-  const summary = calculateSummary(documents);
-  const response = formatIndexResponse(documents, summary);
-  console.log(JSON.stringify(response));
+  if (useJson) {
+    const summary = calculateSummary(documents);
+    const response = formatIndexResponse(documents, summary);
+    console.log(JSON.stringify(response));
+  } else {
+    console.log(formatIndexText(documents));
+  }
   exitWithCode(ExitCode.SUCCESS);
+}
+
+/**
+ * Output error in appropriate format.
+ */
+function outputError(errors: ErrorEntry[], useJson: boolean): void {
+  if (useJson) {
+    console.log(JSON.stringify(formatErrorResponse('index', errors)));
+  } else {
+    console.log(formatErrorText(errors));
+  }
 }
 
 /**
  * Index content from stdin.
  */
-async function indexStdin(): Promise<void> {
+async function indexStdin(useJson: boolean): Promise<void> {
   const documents: DocumentIndex[] = [];
   const errors: ErrorEntry[] = [];
 
@@ -120,15 +157,19 @@ async function indexStdin(): Promise<void> {
     const index = buildDocumentIndex(result.ast, namespace, '<stdin>');
     documents.push(index);
 
-    const summary = calculateSummary(documents);
-    const response = formatIndexResponse(documents, summary);
-    console.log(JSON.stringify(response));
+    if (useJson) {
+      const summary = calculateSummary(documents);
+      const response = formatIndexResponse(documents, summary);
+      console.log(JSON.stringify(response));
+    } else {
+      console.log(formatIndexText(documents));
+    }
     exitWithCode(ExitCode.SUCCESS);
   } catch (error) {
     if (error instanceof Error) {
       errors.push(createErrorEntry('PARSE_ERROR', 'PARSE_ERROR', error.message, '<stdin>'));
     }
-    console.log(JSON.stringify(formatErrorResponse('index', errors)));
+    outputError(errors, useJson);
     exitWithCode(ExitCode.ERROR);
   }
 }

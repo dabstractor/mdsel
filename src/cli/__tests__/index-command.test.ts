@@ -46,7 +46,7 @@ describe('indexCommand', () => {
     // Import after mocks are set up
     const { indexCommand } = await import('../commands/index-command.js');
 
-    await expect(indexCommand([simpleFixture])).rejects.toThrow('process.exit(0)');
+    await expect(indexCommand([simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -64,7 +64,7 @@ describe('indexCommand', () => {
   it('should return proper JSON structure with success, command, timestamp, data', async () => {
     const { indexCommand } = await import('../commands/index-command.js');
 
-    await expect(indexCommand([complexFixture])).rejects.toThrow('process.exit(0)');
+    await expect(indexCommand([complexFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -87,7 +87,7 @@ describe('indexCommand', () => {
   it('should include headings in response', async () => {
     const { indexCommand } = await import('../commands/index-command.js');
 
-    await expect(indexCommand([simpleFixture])).rejects.toThrow('process.exit(0)');
+    await expect(indexCommand([simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -116,7 +116,7 @@ describe('indexCommand', () => {
     const { indexCommand } = await import('../commands/index-command.js');
     const missingFile = join(fixturesDir, 'missing.md');
 
-    await expect(indexCommand([missingFile])).rejects.toThrow('process.exit(1)');
+    await expect(indexCommand([missingFile], { json: true })).rejects.toThrow('process.exit(1)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -132,7 +132,7 @@ describe('indexCommand', () => {
   it('should produce valid index with no headings for empty file', async () => {
     const { indexCommand } = await import('../commands/index-command.js');
 
-    await expect(indexCommand([emptyFixture])).rejects.toThrow('process.exit(0)');
+    await expect(indexCommand([emptyFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -150,7 +150,7 @@ describe('indexCommand', () => {
   it('should handle multiple files correctly', async () => {
     const { indexCommand } = await import('../commands/index-command.js');
 
-    await expect(indexCommand([simpleFixture, complexFixture])).rejects.toThrow('process.exit(0)');
+    await expect(indexCommand([simpleFixture, complexFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -170,7 +170,7 @@ describe('indexCommand', () => {
     const validFile = simpleFixture;
     const invalidFile = join(fixturesDir, 'missing.md');
 
-    await expect(indexCommand([validFile, invalidFile])).rejects.toThrow('process.exit(1)');
+    await expect(indexCommand([validFile, invalidFile], { json: true })).rejects.toThrow('process.exit(1)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -189,7 +189,7 @@ describe('indexCommand', () => {
     const missing1 = join(fixturesDir, 'missing1.md');
     const missing2 = join(fixturesDir, 'missing2.md');
 
-    await expect(indexCommand([missing1, missing2])).rejects.toThrow('process.exit(1)');
+    await expect(indexCommand([missing1, missing2], { json: true })).rejects.toThrow('process.exit(1)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
@@ -202,7 +202,7 @@ describe('indexCommand', () => {
   it('should calculate summary statistics correctly', async () => {
     const { indexCommand } = await import('../commands/index-command.js');
 
-    await expect(indexCommand([complexFixture])).rejects.toThrow('process.exit(0)');
+    await expect(indexCommand([complexFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
     expect(capturedOutput).toHaveLength(1);
     const response = JSON.parse(capturedOutput[0]);
