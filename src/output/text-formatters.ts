@@ -158,7 +158,7 @@ export function formatErrorText(errors: ErrorEntry[]): string {
  */
 export const FORMAT_SPECS = {
   index: {
-    terse: 'hN.I title (indented by depth)\\n---\\ncode:N para:N list:N table:N',
+    terse: 'hN.I title (indented)\\n---\\ncode:N para:N list:N table:N',
     example: `h1.0 mdsel
  h2.0 Installation
  h2.1 Quick Start
