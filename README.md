@@ -18,17 +18,21 @@ npm install -g mdsel
 # Index a document to discover available selectors
 mdsel index README.md
 
-# Select a specific heading
-mdsel select "readme::heading:h1[0]" README.md
+# Select a specific heading (shorthand)
+mdsel select h1.0 README.md
 
 # Select the first code block under a heading
-mdsel select "readme::heading:h2[0]/block:code[0]" README.md
+mdsel select "h2.0/code.0" README.md
+
+# Select multiple headings with comma syntax
+mdsel select h2.0,2 README.md
 
 # Get full content (bypass truncation)
-mdsel select "readme::section[0]?full=true" README.md
-```
+mdsel select "h2.0?full=true" README.md
 
-All commands return structured JSON output for programmatic consumption.
+# Use JSON output for programmatic consumption
+mdsel index README.md --json
+```
 
 ## Commands
 
@@ -38,6 +42,7 @@ Parse documents and emit selector inventory.
 
 ```bash
 mdsel index <files...>
+mdsel index <files...> --json
 ```
 
 **Example**:
@@ -45,7 +50,19 @@ mdsel index <files...>
 mdsel index README.md docs/API.md
 ```
 
-**Output**:
+**Text Output** (default):
+```
+h1.0 mdsel
+ h2.0 Installation
+ h2.1 Quick Start
+ h2.2 Commands
+  h3.0 index
+  h3.1 select
+---
+code:19 para:23 list:5 table:3
+```
+
+**JSON Output** (`--json` flag):
 ```json
 {
   "success": true,
@@ -56,34 +73,13 @@ mdsel index README.md docs/API.md
       {
         "namespace": "readme",
         "file_path": "README.md",
-        "root": {
-          "selector": "readme::root",
-          "type": "root",
-          "content_preview": "Project description...",
-          "truncated": false,
-          "children_count": 2,
-          "word_count": 42
-        },
-        "headings": [
-          {
-            "selector": "readme::heading:h1[0]",
-            "type": "heading:h1",
-            "depth": 1,
-            "text": "Installation",
-            "content_preview": "Installation",
-            "truncated": false,
-            "children_count": 3,
-            "word_count": 1,
-            "section_word_count": 85,
-            "section_truncated": false
-          }
-        ],
+        "headings": [...],
         "blocks": {
           "paragraphs": 5,
           "code_blocks": 2,
           "lists": 1,
           "tables": 0,
-          "blockquote": 0
+          "blockquotes": 0
         }
       }
     ],
@@ -103,6 +99,7 @@ Retrieve content via selectors.
 ```bash
 mdsel select <selector> [files...]
 mdsel select <selector> [files...] --full
+mdsel select <selector> [files...] --json
 ```
 
 **Arguments**:
@@ -111,50 +108,54 @@ mdsel select <selector> [files...] --full
 
 **Options**:
 - `--full` - Bypass truncation and return full content
+- `--json` - Output JSON instead of text
 
 **Examples**:
 ```bash
-# Select from specific document
-mdsel select "readme::heading:h2[0]" README.md
+# Select first h2 (shorthand)
+mdsel select h2.0 README.md
 
 # Select first code block
-mdsel select "block:code[0]" README.md
+mdsel select code.0 README.md
 
 # Select with full content
-mdsel select "readme::section[1]" README.md --full
+mdsel select h2.1 README.md --full
 
 # Cross-document selection (all documents)
-mdsel select "heading:h1[0]" README.md GUIDE.md
+mdsel select h1.0 README.md GUIDE.md
 
 # Query parameter for full retrieval
-mdsel select "readme::section[2]?full=true" README.md
+mdsel select "h2.0?full=true" README.md
+
+# Range selection
+mdsel select h2.1-3 README.md
+
+# Multiple specific indices
+mdsel select h2.0,2,4 README.md
 ```
 
-**Output**:
-```json
-{
-  "success": true,
-  "command": "select",
-  "timestamp": "2025-01-15T10:32:00.000Z",
-  "data": {
-    "matches": [
-      {
-        "selector": "readme::heading:h2[0]",
-        "type": "heading:h2",
-        "content": "## Quick Start\n\nTo get started...",
-        "truncated": false,
-        "children_available": [
-          {
-            "selector": "readme::heading:h2[0]/block:paragraph[0]",
-            "type": "block:paragraph",
-            "preview": "To get started..."
-          }
-        ]
-      }
-    ],
-    "unresolved": []
-  }
-}
+**Text Output** (default):
+```
+## Quick Start
+
+To get started...
+```
+
+**Multiple Results** (selector prefix):
+```
+heading:h2.0:
+## Installation
+content...
+heading:h2.1:
+## Quick Start
+content...
+```
+
+**Error Output**:
+```
+!h2.99
+Index out of range: document has 3 h2 headings
+~h2.0 ~h2.1 ~h2.2
 ```
 
 ## Selectors
@@ -164,58 +165,88 @@ Selectors are path-based, ordinal, stateless, and deterministic. They resemble C
 ### Syntax
 
 ```
-[namespace::]type[index][/path]?query
+[namespace::]type[index][/path][?query]
 ```
 
 - **namespace** (optional) - Document identifier, defaults to all documents
-- **type** - Node type (root, heading, section, block)
-- **index** (optional) - 0-based ordinal among siblings
+- **type** - Node type (root, heading, section, block) or shorthand
+- **index** (optional) - 0-based ordinal: `.N`, `[N]`, `.N-M` (range), `.N,M,O` (list)
 - **path** (optional) - Additional path segments for nested selection
 - **query** (optional) - Query parameters (e.g., `?full=true`)
 
 ### Node Types
 
-| Category | Types |
-|----------|-------|
-| Root | `root` |
-| Headings | `heading:h1`, `heading:h2`, `heading:h3`, `heading:h4`, `heading:h5`, `heading:h6` |
-| Sections | `section` |
-| Blocks | `block:paragraph`, `block:list`, `block:code`, `block:table`, `block:blockquote` |
+| Category | Full Form | Shorthand |
+|----------|-----------|-----------|
+| Root | `root` | - |
+| Headings | `heading:h1` ... `heading:h6` | `h1` ... `h6` |
+| Sections | `section` | - |
+| Blocks | `block:paragraph` | `para`, `paragraph` |
+| | `block:code` | `code` |
+| | `block:list` | `list` |
+| | `block:table` | `table` |
+| | `block:blockquote` | `quote`, `blockquote` |
+
+### Index Syntax
+
+Two equivalent notations are supported:
+
+| Notation | Example | Meaning |
+|----------|---------|---------|
+| Dot | `h2.0` | First h2 |
+| Bracket | `h2[0]` | First h2 |
+| Range | `h2.1-3` or `h2[1-3]` | h2.1, h2.2, h2.3 |
+| Comma list | `h2.0,2,4` or `h2[0,2,4]` | h2.0, h2.2, h2.4 |
+| No index | `h2` | All h2 headings |
 
 ### Examples
 
 **Basic selection**:
 ```bash
-root                           # Document root
-heading:h1[0]                  # First h1 heading
-heading:h2[1]                  # Second h2 heading
-block:code[0]                  # First code block
+root                # Document root
+h1.0                # First h1 heading
+h2.1                # Second h2 heading
+code.0              # First code block
+para.2              # Third paragraph
+```
+
+**Full form (equivalent)**:
+```bash
+heading:h1[0]       # First h1 heading
+block:code[0]       # First code block
 ```
 
 **Namespace selection**:
 ```bash
-readme::root                   # Root in specific document
-docs::heading:h2[0]            # First h2 in docs
-api::block:table[1]            # Second table in api
+readme::root        # Root in specific document
+docs::h2.0          # First h2 in docs
+api::table.1        # Second table in api
 ```
 
 **Path composition**:
 ```bash
-heading:h2[1]/block:code[0]            # First code block under second h2
-section[0]/block:list[1]               # Second list in first section
-docs::heading:h2[0]/section[0]/block:code[0]  # Nested path
+h2.1/code.0                    # First code block under second h2
+section.0/list.1               # Second list in first section
+docs::h2.0/section.0/code.0    # Nested path with namespace
+```
+
+**Range and list selection**:
+```bash
+h2.0-2              # First three h2 headings
+h2.1,3,5            # 2nd, 4th, and 6th h2 headings
+code.0,2            # 1st and 3rd code blocks
 ```
 
 **Query parameters**:
 ```bash
-section[2]?full=true            # Full content bypassing truncation
-heading:h1[0]?full=true         # Full heading content
+h2.0?full=true      # Full content bypassing truncation
+section.2?full=true # Full section content
 ```
 
 **Cross-document selection**:
 ```bash
-heading:h1[0]                   # First h1 from ALL documents
-block:code[0]                   # First code block from ALL documents
+h1.0                # First h1 from ALL documents
+code.0              # First code block from ALL documents
 ```
 
 ### Index Semantics
@@ -223,22 +254,13 @@ block:code[0]                   # First code block from ALL documents
 - Index is **0-based** (first item is index 0)
 - Index counts among siblings of the same type
 - Index is relative to parent context, not global
+- No index means select **all** matches of that type
 
 ## Output Format
 
-All commands return structured JSON following the response envelope:
+Default output is compact text optimized for LLM token efficiency. Use `--json` for structured JSON output.
 
-```typescript
-interface CLIResponse<T = unknown> {
-  success: boolean;
-  command: 'index' | 'select';
-  timestamp: string;        // ISO 8601 format
-  data: T | null;
-  errors?: ErrorEntry[];
-}
-```
-
-### Index Response Schema
+### Index Response Schema (JSON)
 
 ```typescript
 interface IndexResponse {
@@ -251,7 +273,7 @@ interface IndexResponse {
 }
 ```
 
-### Select Response Schema
+### Select Response Schema (JSON)
 
 ```typescript
 interface SelectResponse {
@@ -260,12 +282,6 @@ interface SelectResponse {
     type: string;
     content: string;
     truncated: boolean;
-    pagination?: {
-      current_page: number;
-      total_pages: number;
-      word_count: number;
-      has_more: boolean;
-    };
     children_available: {
       selector: string;
       type: string;
@@ -307,6 +323,14 @@ Content exceeding size limits is truncated with a `[truncated]` marker. Use `?fu
 
 ### Error Response Example
 
+**Text format**:
+```
+!h2.99
+Index out of range: document has 3 h2 headings
+~h2.0 ~h2.1 ~h2.2
+```
+
+**JSON format**:
 ```json
 {
   "success": false,
@@ -316,13 +340,9 @@ Content exceeding size limits is truncated with a `[truncated]` marker. Use `?fu
     "matches": [],
     "unresolved": [
       {
-        "selector": "readme::heading:h2[99]",
+        "selector": "h2.99",
         "reason": "Index out of range: document has 3 h2 headings",
-        "suggestions": [
-          "readme::heading:h2[0]",
-          "readme::heading:h2[1]",
-          "readme::heading:h2[2]"
-        ]
+        "suggestions": ["h2.0", "h2.1", "h2.2"]
       }
     ]
   }

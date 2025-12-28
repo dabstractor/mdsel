@@ -4,7 +4,7 @@
 
 This tool provides **declarative, semantic, path-based selection** over one or more Markdown documents, optimized for **LLM agent consumption** and **token efficiency**.
 
-The tool’s sole responsibility is to:
+The tool's sole responsibility is to:
 
 * Parse Markdown into a **stable semantic tree**
 * Expose **machine-addressable selectors** for every meaningful chunk
@@ -31,8 +31,8 @@ This is a **document selection substrate**.
 
 3. **LLM-Optimized Output**
 
-   * Strictly structured output
-   * Minimal verbosity
+   * Minimal token overhead (compact text by default)
+   * JSON available for programmatic use
    * No human-oriented UX
 
 4. **Zero Summarization**
@@ -62,16 +62,16 @@ Nodes are **block-level only**.
 
 ### 4.1 Structural Nodes
 
-| Node Type                   | Description                           |
-| --------------------------- | ------------------------------------- |
-| `root`                      | Non-heading text before first heading |
-| `heading:h1` … `heading:h6` | Markdown headings                     |
-| `section`                   | A heading + all of its content        |
-| `block:paragraph`           | Free text not otherwise typed         |
-| `block:list`                | Ordered or unordered list             |
-| `block:code`                | Fenced code block                     |
-| `block:table`               | Markdown table                        |
-| `block:blockquote`          | Blockquotes                           |
+| Node Type                   | Shorthand | Description                           |
+| --------------------------- | --------- | ------------------------------------- |
+| `root`                      | -         | Non-heading text before first heading |
+| `heading:h1` … `heading:h6` | `h1`…`h6` | Markdown headings                     |
+| `section`                   | -         | A heading + all of its content        |
+| `block:paragraph`           | `para`    | Free text not otherwise typed         |
+| `block:list`                | `list`    | Ordered or unordered list             |
+| `block:code`                | `code`    | Fenced code block                     |
+| `block:table`               | `table`   | Markdown table                        |
+| `block:blockquote`          | `quote`   | Blockquotes                           |
 
 ### 4.2 Non-Structural Text
 
@@ -110,7 +110,7 @@ Examples:
 
 ```
 doc1::root
-doc2::heading:h2[3]
+doc2::h2.3
 ```
 
 If no namespace is specified, selection applies across **all provided documents**.
@@ -119,28 +119,54 @@ If no namespace is specified, selection applies across **all provided documents*
 
 ### 5.3 Selector Grammar
 
-#### 5.3.1 Base Components
+#### 5.3.1 Full Syntax
 
 ```
-root
-heading:hN[index]
-section[index]
-block:type[index]
+[namespace::]type[:subtype][index][/path][?query]
 ```
 
 Where:
 
-* `hN` = heading level (1–6)
-* `index` = 0-based ordinal among siblings of same type
+* `namespace` = optional document identifier (e.g., `readme::`)
+* `type` = `root`, `heading`, `section`, `block`, or shorthand
+* `subtype` = heading level (`h1`-`h6`) or block type (`code`, `paragraph`, etc.)
+* `index` = 0-based ordinal (see §5.3.2)
+* `path` = additional path segments separated by `/`
+* `query` = query parameters (e.g., `?full=true`)
+
+#### 5.3.2 Index Notation
+
+Two equivalent notations:
+
+| Notation | Example | Meaning |
+|----------|---------|---------|
+| Dot | `h2.0` | First h2 |
+| Bracket | `h2[0]` | First h2 |
+| Range | `h2.1-3` | h2.1, h2.2, h2.3 |
+| Comma list | `h2.0,2,4` | h2.0, h2.2, h2.4 |
+| No index | `h2` | All h2 headings |
+
+#### 5.3.3 Shorthand Forms
+
+For common node types:
+
+| Shorthand | Expands To |
+|-----------|------------|
+| `h1`…`h6` | `heading:h1`…`heading:h6` |
+| `code` | `block:code` |
+| `para` | `block:paragraph` |
+| `list` | `block:list` |
+| `table` | `block:table` |
+| `quote` | `block:blockquote` |
 
 ---
 
-#### 5.3.2 Path Composition
+#### 5.3.4 Path Composition
 
 Selectors compose left-to-right:
 
 ```
-doc::heading:h2[1]/section[0]/block:code[0]
+doc::h2.1/section.0/code.0
 ```
 
 Meaning:
@@ -151,14 +177,14 @@ Meaning:
 
 ---
 
-#### 5.3.3 Implicit Expansion
+#### 5.3.5 Implicit Expansion
 
 Selecting a parent yields all children.
 
 Example:
 
 ```
-doc::heading:h2[1]
+doc::h2.1
 ```
 
 Returns:
@@ -197,13 +223,13 @@ Large nodes are split into **virtual pages**.
 Example:
 
 ```
-section[2] → page[0], page[1], page[2]
+section.2 → page[0], page[1], page[2]
 ```
 
 The selector surface exposes:
 
 ```
-doc::section[2]/page[1]
+doc::section.2/page.1
 ```
 
 The agent may request:
@@ -218,7 +244,7 @@ The agent may request:
 The agent may explicitly request:
 
 ```
-doc::section[2]?full=true
+doc::section.2?full=true
 ```
 
 This bypasses truncation.
@@ -233,14 +259,13 @@ When requested to **index** or **overview**, the tool returns:
 For each document:
 
 * Namespace
-* Root node (truncated)
 * All headings with:
 
-  * Selector
+  * Selector (shorthand form: `h2.0`)
   * Heading text
-  * Node type
-  * Child count
-  * Truncation indicator
+  * Indentation by depth
+
+* Block summary counts
 
 No summaries.
 No inference.
@@ -248,7 +273,7 @@ No semantic compression beyond omission.
 
 ---
 
-## 8. Discovery of “Other Key Tokens”
+## 8. Discovery of "Other Key Tokens"
 
 ### 8.1 Detection Strategy
 
@@ -286,9 +311,20 @@ Parse documents and emit selector inventory.
 
 ```
 mdsel index file1.md file2.md
+mdsel index file1.md --json
 ```
 
-Returns:
+Returns (text format):
+
+```
+h1.0 Title
+ h2.0 Installation
+ h2.1 Usage
+---
+code:5 para:12 list:3 table:1
+```
+
+Returns (JSON format with `--json`):
 
 * Namespaces
 * Selectors
@@ -302,23 +338,30 @@ Returns:
 Retrieve content via selectors.
 
 ```
-mdsel select doc::heading:h2[1]
-mdsel select block:code[0]
+mdsel select h2.1 file.md
+mdsel select code.0 file.md
+mdsel select h2.0-2 file.md
 ```
 
 Selectors may be:
 
-* Fully qualified
+* Fully qualified (`readme::h2.0`)
 * Partially qualified (applies across all namespaces)
 
 ---
 
 ### 9.2 Output Format
 
-**Strict structured output (JSON)**
+**Default: Compact text** (optimized for LLM token efficiency)
 
-No free text.
-No prose.
+* No JSON overhead
+* Minimal verbosity
+* Suitable for direct context injection
+
+**Optional: JSON** (with `--json` flag)
+
+* Structured output for programmatic use
+* Full metadata included
 
 Fields include:
 
@@ -343,6 +386,13 @@ Response includes:
 * `unresolved_selectors`
 * `warnings`
 
+Text format:
+```
+!selector
+reason
+~suggestion1 ~suggestion2
+```
+
 ---
 
 ### 10.2 Suggestions
@@ -355,12 +405,12 @@ Based on:
 * Existing selectors
 * Levenshtein / prefix similarity
 
-Example:
+Example (text):
 
 ```
-Did you mean:
-- doc::heading:h3[2]
-- doc::section[5]
+!h3.99
+Index out of range
+~h3.0 ~h3.1 ~h3.2
 ```
 
 ---
@@ -403,4 +453,3 @@ The tool is successful if:
 * Without ever seeing irrelevant content
 * Using only declarative selectors
 * With minimal token overhead
-
