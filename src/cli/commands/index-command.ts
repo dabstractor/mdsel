@@ -115,7 +115,7 @@ export async function indexCommand(
       // Text output: show what succeeded, then errors
       console.log(formatIndexText(documents));
       console.log('');
-      console.log(formatErrorText(errors));
+      console.error(formatErrorText(errors));
     }
     exitWithCode(ExitCode.ERROR);
     return;
@@ -137,9 +137,11 @@ export async function indexCommand(
  */
 function outputError(errors: ErrorEntry[], useJson: boolean): void {
   if (useJson) {
+    // JSON errors to stdout for consistent parsing
     console.log(JSON.stringify(formatErrorResponse('index', errors)));
   } else {
-    console.log(formatErrorText(errors));
+    // Text errors to stderr per Unix convention
+    console.error(formatErrorText(errors));
   }
 }
 

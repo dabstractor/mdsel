@@ -179,9 +179,11 @@ export async function selectCommand(
  */
 function outputError(errors: ErrorEntry[], useJson: boolean): void {
   if (useJson) {
+    // JSON errors to stdout for consistent parsing
     console.log(JSON.stringify(formatErrorResponse('select', errors)));
   } else {
-    console.log(formatErrorText(errors));
+    // Text errors to stderr per Unix convention
+    console.error(formatErrorText(errors));
   }
 }
 
