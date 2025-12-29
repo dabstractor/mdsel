@@ -53,11 +53,11 @@ describe('README output size targets', () => {
     it('should contain expected structure', () => {
       const result = runCLI(['index', 'README.md']);
 
-      // Should have namespace and filepath on first line
-      expect(result.stdout).toMatch(/^readme README\.md/);
-      // Should have heading indicators
-      expect(result.stdout).toContain('h1[0]');
-      expect(result.stdout).toContain('h2[');
+      // For single file, no namespace prefix (starts with heading)
+      expect(result.stdout).toMatch(/^h1\.0/);
+      // Should have heading indicators (dot notation)
+      expect(result.stdout).toContain('h1.0');
+      expect(result.stdout).toContain('h2.');
       // Should have block summary after ---
       expect(result.stdout).toContain('---');
       expect(result.stdout).toMatch(/code:\d+/);
@@ -116,14 +116,18 @@ describe('README output size targets', () => {
       const result = runCLI(['format', 'index']);
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('index:');
+      // Terse spec describes the format pattern
+      expect(result.stdout).toContain('hN.I');
+      expect(result.stdout).toContain('code:N');
     });
 
     it('should output example format with --example', () => {
       const result = runCLI(['format', 'index', '--example']);
 
       expect(result.exitCode).toBe(0);
-      expect(result.stdout).toContain('# index output format');
+      // Example shows actual formatted output
+      expect(result.stdout).toContain('h1.0');
+      expect(result.stdout).toContain('---');
     });
 
     it('should output all formats when no command specified', () => {

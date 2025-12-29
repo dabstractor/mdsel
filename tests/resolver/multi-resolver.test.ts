@@ -297,7 +297,7 @@ describe('resolveMulti', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.results[0].namespace).toBe('doc');
-        expect(result.results[0].node.type).toBe('heading');
+        expect(result.results[0].node.type).toBe('section');
       }
     });
   });

@@ -45,7 +45,7 @@ describe('resolveSingle', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.results[0].node.type).toBe('heading');
+        expect(result.results[0].node.type).toBe('section');
         expect(result.results[0].node.depth).toBe(1);
         expect(result.results[0].wordCount).toBeGreaterThan(0);
       }
@@ -60,7 +60,7 @@ describe('resolveSingle', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.results[0].node.type).toBe('heading');
+        expect(result.results[0].node.type).toBe('section');
         expect(result.results[0].node.depth).toBe(2);
       }
     });
@@ -160,7 +160,7 @@ describe('resolveSingle', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.results[0].node.type).toBe('heading');
+        expect(result.results[0].node.type).toBe('section');
         expect(result.results[0].node.depth).toBe(1);
       }
     });
@@ -177,7 +177,7 @@ describe('resolveSingle', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.results[0].node.type).toBe('heading');
+        expect(result.results[0].node.type).toBe('section');
         expect(result.results[0].node.depth).toBe(1);
       }
     });
@@ -428,7 +428,7 @@ describe('resolveSingle', () => {
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.results[0].node.type).toBe('heading');
+        expect(result.results[0].node.type).toBe('section');
       }
     });
   });

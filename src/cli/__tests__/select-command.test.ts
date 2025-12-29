@@ -61,6 +61,7 @@ describe('selectCommand', () => {
     it('should select heading by selector', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const selector = `simple::heading:h1[0]`;
+      const normalizedSelector = `simple::heading:h1.0`; // Output uses dot notation
 
       await expect(selectCommand(selector, [simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
@@ -74,8 +75,8 @@ describe('selectCommand', () => {
       expect(response.data.matches).toHaveLength(1);
 
       const match = response.data.matches[0];
-      expect(match.selector).toBe(selector);
-      expect(match.type).toBe('heading');
+      expect(match.selector).toBe(normalizedSelector);
+      expect(match.type).toBe('section'); // heading resolves to section
       expect(match.content).toContain('# Main Title');
       expect(match.truncated).toBe(false);
     });
@@ -83,6 +84,7 @@ describe('selectCommand', () => {
     it('should select deeper heading correctly', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const selector = `simple::heading:h2[0]`;
+      const normalizedSelector = `simple::heading:h2.0`; // Output uses dot notation
 
       await expect(selectCommand(selector, [simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
@@ -91,8 +93,8 @@ describe('selectCommand', () => {
 
       expect(response.data.matches).toHaveLength(1);
       const match = response.data.matches[0];
-      expect(match.selector).toBe(selector);
-      expect(match.type).toBe('heading');
+      expect(match.selector).toBe(normalizedSelector);
+      expect(match.type).toBe('section'); // heading resolves to section
       expect(match.content).toContain('## First Section');
     });
 
@@ -221,6 +223,7 @@ describe('selectCommand', () => {
     it('should handle unresolved selector returns suggestions', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const unresolvedSelector = `simple::heading:h1[99]`; // Index out of range
+      const normalizedSelector = `simple::heading:h1.99`; // Output uses dot notation
 
       await expect(selectCommand(unresolvedSelector, [simpleFixture], { json: true })).rejects.toThrow(
         'process.exit(1)',
@@ -232,9 +235,9 @@ describe('selectCommand', () => {
       expect(response.success).toBe(false);
       expect(response.data).toBeDefined();
       expect(response.data.unresolved).toHaveLength(1);
-      expect(response.data.unresolved[0].selector).toBe(unresolvedSelector);
+      expect(response.data.unresolved[0].selector).toBe(normalizedSelector);
       expect(response.data.unresolved[0].reason).toContain('Index 99 out of range');
-      expect(response.unresolved_selectors).toEqual([unresolvedSelector]);
+      expect(response.unresolved_selectors).toEqual([normalizedSelector]);
 
       // Should have suggestions
       const suggestions = response.data.unresolved[0].suggestions;

@@ -3,7 +3,7 @@
 ## Important Reminders
 
 ### When changing output format
-Always update `FORMAT_SPECS` in `src/output/text-formatters.ts` to match the new format. The `format` command outputs these specs for LLM tool descriptions.
+Always update `FORMAT_SPECS` in `src/output/text-formatters.ts` and any relevant tests to match the new format. The `format` command outputs these specs for LLM tool descriptions.
 
 ### Output format rules (current)
 

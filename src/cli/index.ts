@@ -19,7 +19,7 @@ program
   .option('--json', 'Output JSON instead of minimal text');
 
 program
-  .command('index')
+  .command('index', { isDefault: true })
   .description('Parse documents and emit selector inventory')
   .argument('<files...>', 'Markdown files to index')
   .action(async (files: string[]) => {
