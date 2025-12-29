@@ -6,7 +6,7 @@ export default defineConfig({
   target: 'node18',
   dts: true,
   clean: true,
-  sourcemap: true,
+  sourcemap: false,
   outExtension() {
     return {
       js: '.mjs',

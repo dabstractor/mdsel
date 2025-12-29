@@ -33,10 +33,22 @@
     "selector",
     "cli",
     "llm",
-    "ast"
+    "ast",
+    "parser",
+    "semantic",
+    "content-selection",
+    "agent"
   ],
-  "author": "",
+  "author": "dabstractor",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dabstractor/mdsel.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dabstractor/mdsel/issues"
+  },
+  "homepage": "https://github.com/dabstractor/mdsel#readme",
   "engines": {
     "node": ">=18.0.0"
   },
