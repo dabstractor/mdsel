@@ -17,15 +17,13 @@ import { formatSelectResponse, formatErrorResponse, createErrorEntry } from '../
 import { formatSelectText, formatErrorText } from '../../output/text-formatters.js';
 import { deriveNamespace } from '../utils/namespace.js';
 import { buildAvailableSelectors } from '../utils/selector-builder.js';
-import { extractMarkdown, truncateContent } from '../utils/content-extractor.js';
+import { extractMarkdown, truncateContent, type TruncateOptions } from '../utils/content-extractor.js';
 import { ExitCode, exitWithCode } from '../utils/exit-codes.js';
 
 /**
  * Options for the select command.
  */
 export interface SelectOptions {
-  /** Bypass truncation and return full content */
-  full?: boolean;
   /** Output JSON instead of text */
   json?: boolean;
 }
@@ -45,7 +43,7 @@ export interface SelectOptions {
  * ```bash
  * mdsel select "readme::heading:h1[0]" README.md
  * mdsel select "heading:h2[0]" README.md CONTRIBUTING.md
- * mdsel --json select "docs::section[5]?full=true" docs.md --full
+ * mdsel --json select "docs::section[5]?head=10" docs.md
  * ```
  */
 export async function selectCommand(
@@ -87,10 +85,23 @@ export async function selectCommand(
     throw error;
   }
 
-  // Check for full flag (either --full OR ?full=true in selector)
-  const hasFullQueryParam =
-    selectorAst.queryParams?.some((p) => p.key === 'full' && p.value === 'true') ?? false;
-  const isFull = options.full === true || hasFullQueryParam;
+  // Parse head/tail query params for truncation
+  const truncateOptions: TruncateOptions = {};
+  if (selectorAst.queryParams) {
+    for (const param of selectorAst.queryParams) {
+      if (param.key === 'head') {
+        const value = parseInt(param.value, 10);
+        if (!isNaN(value) && value > 0) {
+          truncateOptions.head = value;
+        }
+      } else if (param.key === 'tail') {
+        const value = parseInt(param.value, 10);
+        if (!isNaN(value) && value > 0) {
+          truncateOptions.tail = value;
+        }
+      }
+    }
+  }
 
   // Parse all files and build DocumentTree[]
   const documents: DocumentTree[] = [];
@@ -134,7 +145,7 @@ export async function selectCommand(
 
   // Format response based on outcome
   if (outcome.success) {
-    const matches = formatMatches(outcome.results, isFull);
+    const matches = formatMatches(outcome.results, truncateOptions);
     if (useJson) {
       const response = formatSelectResponse(matches, []);
       console.log(JSON.stringify(response));
@@ -186,9 +197,9 @@ const SELECTABLE_BLOCKS: Record<string, string> = {
 /**
  * Format resolution results into SelectMatch objects.
  */
-function formatMatches(results: ResolutionResult[], isFull: boolean): SelectMatch[] {
+function formatMatches(results: ResolutionResult[], truncateOpts: TruncateOptions): SelectMatch[] {
   return results.map((result) => {
-    const { content, truncated } = truncateContent(extractMarkdown(result.node), { full: isFull });
+    const { content, truncated } = truncateContent(extractMarkdown(result.node), truncateOpts);
 
     // Build children_available list - only include selectable block types
     const childrenAvailable: ChildInfo[] = [];

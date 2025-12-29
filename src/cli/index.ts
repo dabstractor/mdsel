@@ -37,11 +37,10 @@ program
   .description('Retrieve content via selectors')
   .argument('<selector>', 'Selector string')
   .argument('[files...]', 'Markdown files to search')
-  .option('--full', 'Bypass truncation and return full content')
-  .action(async (selector: string, files: string[], options: { full?: boolean }) => {
+  .action(async (selector: string, files: string[]) => {
     try {
       const globalOpts = program.opts<{ json?: boolean }>();
-      await selectCommand(selector, files, { ...options, json: globalOpts.json });
+      await selectCommand(selector, files, { json: globalOpts.json });
     } catch (error) {
       console.error('Unexpected error:', error);
       process.exit(ExitCode.ERROR);

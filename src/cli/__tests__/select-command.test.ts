@@ -129,23 +129,9 @@ describe('selectCommand', () => {
       expect(response.data.matches.length).toBeGreaterThan(1);
     });
 
-    it('should handle full content flag with --full option', async () => {
+    it('should return full content by default', async () => {
       const { selectCommand } = await import('../commands/select-command.js');
       const selector = `simple::heading:h1[0]`;
-
-      await expect(selectCommand(selector, [simpleFixture], { full: true, json: true })).rejects.toThrow(
-        'process.exit(0)',
-      );
-
-      expect(capturedOutput).toHaveLength(1);
-      const response = JSON.parse(capturedOutput[0]);
-
-      expect(response.data.matches[0].truncated).toBe(false);
-    });
-
-    it('should handle full content flag with query parameter', async () => {
-      const { selectCommand } = await import('../commands/select-command.js');
-      const selector = `simple::heading:h1[0]?full=true`;
 
       await expect(selectCommand(selector, [simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
 
@@ -153,6 +139,32 @@ describe('selectCommand', () => {
       const response = JSON.parse(capturedOutput[0]);
 
       expect(response.data.matches[0].truncated).toBe(false);
+    });
+
+    it('should truncate with head query parameter', async () => {
+      const { selectCommand } = await import('../commands/select-command.js');
+      const selector = `simple::heading:h1[0]?head=1`;
+
+      await expect(selectCommand(selector, [simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
+
+      expect(capturedOutput).toHaveLength(1);
+      const response = JSON.parse(capturedOutput[0]);
+
+      expect(response.data.matches[0].truncated).toBe(true);
+      expect(response.data.matches[0].content).toContain('[truncated]');
+    });
+
+    it('should truncate with tail query parameter', async () => {
+      const { selectCommand } = await import('../commands/select-command.js');
+      const selector = `simple::heading:h1[0]?tail=1`;
+
+      await expect(selectCommand(selector, [simpleFixture], { json: true })).rejects.toThrow('process.exit(0)');
+
+      expect(capturedOutput).toHaveLength(1);
+      const response = JSON.parse(capturedOutput[0]);
+
+      expect(response.data.matches[0].truncated).toBe(true);
+      expect(response.data.matches[0].content).toContain('[truncated]');
     });
   });
 

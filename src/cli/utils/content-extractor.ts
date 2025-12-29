@@ -12,9 +12,6 @@ import { toMarkdown } from 'mdast-util-to-markdown';
 import { gfmToMarkdown } from 'mdast-util-gfm';
 import type { Root, RootContent } from 'mdast';
 
-/** Maximum words before truncation (disabled by default) */
-const MAX_WORDS = Infinity;
-
 /** Default preview length in characters */
 const PREVIEW_LENGTH = 80;
 
@@ -137,50 +134,74 @@ export function getContentPreview(text: string, maxLen: number = PREVIEW_LENGTH)
 }
 
 /**
- * Truncate content at word boundaries.
+ * Options for truncating content.
+ */
+export interface TruncateOptions {
+  /** Return only the first N lines */
+  head?: number;
+  /** Return only the last N lines */
+  tail?: number;
+}
+
+/**
+ * Truncate content by line count.
+ *
+ * By default returns full content. Use head or tail to limit output.
  *
  * @param content - The content to potentially truncate
- * @param options - Options including full flag
+ * @param options - Options for head/tail truncation
  * @returns Truncated content result
  *
  * @example
  * ```typescript
- * // With full: false (default)
+ * // Full content (default)
  * truncateContent(longContent);
- * // { content: "First 500 words... [truncated]", truncated: true, wordCount: 500 }
- *
- * // With full: true
- * truncateContent(longContent, { full: true });
  * // { content: "All content...", truncated: false, wordCount: 1500 }
+ *
+ * // First 10 lines
+ * truncateContent(longContent, { head: 10 });
+ * // { content: "First 10 lines...\n[truncated]", truncated: true, wordCount: ... }
+ *
+ * // Last 5 lines
+ * truncateContent(longContent, { tail: 5 });
+ * // { content: "[truncated]\nLast 5 lines...", truncated: true, wordCount: ... }
  * ```
  */
 export function truncateContent(
   content: string,
-  options: { full?: boolean } = {},
+  options: TruncateOptions = {},
 ): TruncatedContent {
-  const wordCount = countWords(content);
+  const lines = content.split('\n');
+  const totalLines = lines.length;
 
-  if (options.full || wordCount <= MAX_WORDS) {
-    return { content, truncated: false, wordCount };
+  // Head truncation: return first N lines
+  if (options.head !== undefined && options.head > 0) {
+    if (options.head >= totalLines) {
+      return { content, truncated: false, wordCount: countWords(content) };
+    }
+    const truncatedLines = lines.slice(0, options.head);
+    const truncatedContent = truncatedLines.join('\n') + '\n' + TRUNCATION_MARKER;
+    return {
+      content: truncatedContent,
+      truncated: true,
+      wordCount: countWords(truncatedContent),
+    };
   }
 
-  // Truncate at word boundary while preserving newlines
-  let words = 0;
-  let endPos = 0;
-  const wordRegex = /\S+/g;
-  let match;
-
-  while ((match = wordRegex.exec(content)) !== null) {
-    words++;
-    if (words > MAX_WORDS) break;
-    endPos = match.index + match[0].length;
+  // Tail truncation: return last N lines
+  if (options.tail !== undefined && options.tail > 0) {
+    if (options.tail >= totalLines) {
+      return { content, truncated: false, wordCount: countWords(content) };
+    }
+    const truncatedLines = lines.slice(-options.tail);
+    const truncatedContent = TRUNCATION_MARKER + '\n' + truncatedLines.join('\n');
+    return {
+      content: truncatedContent,
+      truncated: true,
+      wordCount: countWords(truncatedContent),
+    };
   }
 
-  const truncatedContent = content.slice(0, endPos) + '\n' + TRUNCATION_MARKER;
-
-  return {
-    content: truncatedContent,
-    truncated: true,
-    wordCount: MAX_WORDS,
-  };
+  // Default: return full content
+  return { content, truncated: false, wordCount: countWords(content) };
 }

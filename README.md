@@ -27,8 +27,11 @@ mdsel select "h2.0/code.0" README.md
 # Select multiple headings with comma syntax
 mdsel select h2.0,2 README.md
 
-# Get full content (bypass truncation)
-mdsel select "h2.0?full=true" README.md
+# Limit output to first 10 lines
+mdsel select "h2.0?head=10" README.md
+
+# Limit output to last 5 lines
+mdsel select "h2.0?tail=5" README.md
 
 # Use JSON output for programmatic consumption
 mdsel index README.md --json
@@ -98,7 +101,6 @@ Retrieve content via selectors.
 
 ```bash
 mdsel select <selector> [files...]
-mdsel select <selector> [files...] --full
 mdsel select <selector> [files...] --json
 ```
 
@@ -107,7 +109,6 @@ mdsel select <selector> [files...] --json
 - `[files...]` - Markdown files to search (optional, uses stdin if omitted)
 
 **Options**:
-- `--full` - Bypass truncation and return full content
 - `--json` - Output JSON instead of text
 
 **Examples**:
@@ -118,14 +119,14 @@ mdsel select h2.0 README.md
 # Select first code block
 mdsel select code.0 README.md
 
-# Select with full content
-mdsel select h2.1 README.md --full
-
 # Cross-document selection (all documents)
 mdsel select h1.0 README.md GUIDE.md
 
-# Query parameter for full retrieval
-mdsel select "h2.0?full=true" README.md
+# Limit output to first 10 lines
+mdsel select "h2.0?head=10" README.md
+
+# Limit output to last 5 lines
+mdsel select "h2.0?tail=5" README.md
 
 # Range selection
 mdsel select h2.1-3 README.md
@@ -172,7 +173,7 @@ Selectors are path-based, ordinal, stateless, and deterministic. They resemble C
 - **type** - Node type (root, heading, section, block) or shorthand
 - **index** (optional) - 0-based ordinal: `.N`, `[N]`, `.N-M` (range), `.N,M,O` (list)
 - **path** (optional) - Additional path segments for nested selection
-- **query** (optional) - Query parameters (e.g., `?full=true`)
+- **query** (optional) - Query parameters (e.g., `?head=10`, `?tail=5`)
 
 ### Node Types
 
@@ -239,8 +240,9 @@ code.0,2            # 1st and 3rd code blocks
 
 **Query parameters**:
 ```bash
-h2.0?full=true      # Full content bypassing truncation
-section.2?full=true # Full section content
+h2.0?head=10        # First 10 lines of content
+h2.0?tail=5         # Last 5 lines of content
+section.2?head=20   # First 20 lines of section
 ```
 
 **Cross-document selection**:
@@ -298,7 +300,7 @@ interface SelectResponse {
 
 ### Truncation
 
-Content exceeding size limits is truncated with a `[truncated]` marker. Use `?full=true` query parameter or `--full` flag to bypass truncation.
+By default, full content is returned. Use `?head=N` or `?tail=N` query parameters to limit output to the first or last N lines. Truncated content includes a `[truncated]` marker.
 
 ## Error Handling
 
