@@ -34,7 +34,7 @@ code:19 para:23 list:5 table:3
 **2. Select specific content by selector:**
 
 ```bash
-$ mdsel select h2.1 README.md
+$ mdsel README.md h2.1
 ```
 ```
 ## Installation
@@ -49,7 +49,7 @@ npm install -g mdsel
 **3. Drill into nested content:**
 
 ```bash
-$ mdsel select h2.1/code.0 README.md
+$ mdsel README.md h2.1/code.0
 ```
 ```
 npm install -g mdsel
@@ -67,41 +67,50 @@ npm install -g mdsel
 
 ```bash
 # Index a document to discover available selectors
-mdsel index README.md
+mdsel README.md
 
 # Select a specific heading (shorthand)
-mdsel select h1.0 README.md
+mdsel README.md h1.0
 
 # Select the first code block under a heading
-mdsel select "h2.0/code.0" README.md
+mdsel README.md "h2.0/code.0"
 
 # Select multiple headings with comma syntax
-mdsel select h2.0,2 README.md
+mdsel README.md h2.0,2
+
+# Select multiple selectors at once
+mdsel README.md h2.0 h2.1 code.0
 
 # Limit output to first 10 lines
-mdsel select "h2.0?head=10" README.md
+mdsel README.md "h2.0?head=10"
 
 # Limit output to last 5 lines
-mdsel select "h2.0?tail=5" README.md
+mdsel README.md "h2.0?tail=5"
 
 # Use JSON output for programmatic consumption
-mdsel index README.md --json
+mdsel --json README.md
 ```
 
-## Commands
+## Usage
 
-### index
-
-Parse documents and emit selector inventory.
+mdsel automatically detects whether arguments are files or selectors:
 
 ```bash
-mdsel index <files...>
-mdsel index <files...> --json
+mdsel <files...> [selectors...]
+mdsel [options] <files...> [selectors...]
 ```
 
-**Example**:
+**Options**:
+- `--json` - Output JSON instead of text
+
+### Index (files only)
+
+When only files are provided, mdsel outputs the document structure:
+
 ```bash
-mdsel index README.md docs/API.md
+mdsel README.md
+mdsel README.md docs/API.md
+mdsel --json README.md
 ```
 
 **Text Output** (default):
@@ -109,9 +118,9 @@ mdsel index README.md docs/API.md
 h1.0 mdsel
  h2.0 Installation
  h2.1 Quick Start
- h2.2 Commands
-  h3.0 index
-  h3.1 select
+ h2.2 Usage
+  h3.0 Index
+  h3.1 Select
 ---
 code:19 para:23 list:5 table:3
 ```
@@ -146,44 +155,28 @@ code:19 para:23 list:5 table:3
 }
 ```
 
-### select
+### Select (files + selectors)
 
-Retrieve content via selectors.
+When both files and selectors are provided, mdsel retrieves matching content:
 
 ```bash
-mdsel select <selector> [files...]
-mdsel select <selector> [files...] --json
-```
+# Single selector
+mdsel README.md h2.0
 
-**Arguments**:
-- `<selector>` - Selector string (see [Selectors](#selectors))
-- `[files...]` - Markdown files to search (optional, uses stdin if omitted)
+# Multiple selectors
+mdsel README.md h2.0 h2.1 code.0
 
-**Options**:
-- `--json` - Output JSON instead of text
+# Cross-document selection
+mdsel README.md GUIDE.md h1.0
 
-**Examples**:
-```bash
-# Select first h2 (shorthand)
-mdsel select h2.0 README.md
-
-# Select first code block
-mdsel select code.0 README.md
-
-# Cross-document selection (all documents)
-mdsel select h1.0 README.md GUIDE.md
-
-# Limit output to first 10 lines
-mdsel select "h2.0?head=10" README.md
-
-# Limit output to last 5 lines
-mdsel select "h2.0?tail=5" README.md
+# With query parameters
+mdsel README.md "h2.0?head=10"
 
 # Range selection
-mdsel select h2.1-3 README.md
+mdsel README.md h2.1-3
 
-# Multiple specific indices
-mdsel select h2.0,2,4 README.md
+# Comma list selection
+mdsel README.md h2.0,2,4
 ```
 
 **Text Output** (default):

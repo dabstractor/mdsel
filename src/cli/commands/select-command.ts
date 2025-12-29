@@ -41,9 +41,9 @@ export interface SelectOptions {
  *
  * @example
  * ```bash
- * mdsel select "readme::heading:h1[0]" README.md
- * mdsel select "heading:h2[0]" README.md CONTRIBUTING.md
- * mdsel --json select "docs::section[5]?head=10" docs.md
+ * mdsel README.md h1.0
+ * mdsel README.md CONTRIBUTING.md h2.0
+ * mdsel --json docs.md "section[5]?head=10"
  * ```
  */
 export async function selectCommand(
@@ -252,4 +252,143 @@ function formatMatches(results: ResolutionResult[], truncateOpts: TruncateOption
       children_available: childrenAvailable,
     };
   });
+}
+
+/**
+ * Execute the select command with multiple selectors.
+ *
+ * Parses each selector, resolves them against the specified documents,
+ * and outputs all matched content.
+ *
+ * @param selectors - Array of selector strings to resolve
+ * @param files - Array of file paths to search
+ * @param options - Command options
+ *
+ * @example
+ * ```bash
+ * mdsel README.md h1.0 h2.0 h2.1
+ * mdsel README.md code.0 para.0
+ * ```
+ */
+export async function selectMultiCommand(
+  selectors: string[],
+  files: string[],
+  options: SelectOptions = {},
+): Promise<void> {
+  const useJson = options.json === true;
+
+  // Validate files
+  if (files.length === 0) {
+    const error = createErrorEntry(
+      'PARSE_ERROR',
+      'NO_FILES',
+      'No files provided. Specify files to search.',
+    );
+    outputError([error], useJson);
+    exitWithCode(ExitCode.ERROR);
+    return;
+  }
+
+  // Parse all files and build DocumentTree[]
+  const documents: DocumentTree[] = [];
+  const parseErrors: ErrorEntry[] = [];
+
+  for (const file of files) {
+    try {
+      const result = await parseFile(file);
+      const namespace = deriveNamespace(file);
+      const availableSelectors = buildAvailableSelectors(result.ast, namespace);
+      documents.push({
+        namespace,
+        tree: result.ast,
+        availableSelectors,
+      });
+    } catch (error) {
+      if (error instanceof ParserError) {
+        parseErrors.push(
+          createErrorEntry(
+            error.code as 'FILE_NOT_FOUND' | 'PARSE_ERROR',
+            error.code,
+            error.message,
+            error.filePath,
+          ),
+        );
+      } else if (error instanceof Error) {
+        parseErrors.push(createErrorEntry('PROCESSING_ERROR', 'UNKNOWN', error.message, file));
+      }
+    }
+  }
+
+  // If no documents could be parsed, return error
+  if (documents.length === 0) {
+    outputError(parseErrors, useJson);
+    exitWithCode(ExitCode.ERROR);
+    return;
+  }
+
+  // Process each selector
+  const allMatches: SelectMatch[] = [];
+  const allUnresolved: Array<{ selector: string; reason: string; suggestions: string[] }> = [];
+
+  for (const selector of selectors) {
+    // Parse selector
+    let selectorAst: ReturnType<typeof parseSelector>;
+    try {
+      selectorAst = parseSelector(selector);
+    } catch (error) {
+      if (error instanceof SelectorParseError) {
+        allUnresolved.push({
+          selector,
+          reason: error.message,
+          suggestions: [],
+        });
+        continue;
+      }
+      throw error;
+    }
+
+    // Parse head/tail query params for truncation
+    const truncateOptions: TruncateOptions = {};
+    if (selectorAst.queryParams) {
+      for (const param of selectorAst.queryParams) {
+        if (param.key === 'head') {
+          const value = parseInt(param.value, 10);
+          if (!isNaN(value) && value > 0) {
+            truncateOptions.head = value;
+          }
+        } else if (param.key === 'tail') {
+          const value = parseInt(param.value, 10);
+          if (!isNaN(value) && value > 0) {
+            truncateOptions.tail = value;
+          }
+        }
+      }
+    }
+
+    // Resolve selector
+    const outcome = resolveMulti(documents, selectorAst);
+
+    if (outcome.success) {
+      const matches = formatMatches(outcome.results, truncateOptions);
+      allMatches.push(...matches);
+    } else {
+      const err = outcome.error;
+      allUnresolved.push({
+        selector: err.selector,
+        reason: err.message,
+        suggestions: err.suggestions.map((s) => s.selector),
+      });
+    }
+  }
+
+  // Output results
+  if (useJson) {
+    const response = formatSelectResponse(allMatches, allUnresolved);
+    console.log(JSON.stringify(response));
+  } else {
+    console.log(formatSelectText(allMatches, allUnresolved));
+  }
+
+  // Exit with error if any selectors failed
+  exitWithCode(allUnresolved.length > 0 ? ExitCode.ERROR : ExitCode.SUCCESS);
 }

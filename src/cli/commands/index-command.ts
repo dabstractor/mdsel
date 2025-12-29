@@ -35,9 +35,9 @@ export interface IndexOptions {
  *
  * @example
  * ```bash
- * mdsel index README.md
- * mdsel index README.md CONTRIBUTING.md
- * mdsel --json index README.md
+ * mdsel README.md
+ * mdsel README.md CONTRIBUTING.md
+ * mdsel --json README.md
  * ```
  */
 export async function indexCommand(

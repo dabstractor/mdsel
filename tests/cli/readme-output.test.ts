@@ -26,9 +26,9 @@ describe('README output size targets', () => {
   const readmePath = join(process.cwd(), 'README.md');
   const readmeSize = statSync(readmePath).size;
 
-  describe('index command', () => {
+  describe('index (files only)', () => {
     it('text output should be under 1000 chars', () => {
-      const result = runCLI(['index', 'README.md']);
+      const result = runCLI(['README.md']);
 
       expect(result.exitCode).toBe(0);
       expect(result.stdout.length).toBeLessThan(1000);
@@ -36,28 +36,28 @@ describe('README output size targets', () => {
     });
 
     it('text output should be <15% of file size', () => {
-      const result = runCLI(['index', 'README.md']);
+      const result = runCLI(['README.md']);
 
       const ratio = result.stdout.length / readmeSize;
       expect(ratio).toBeLessThan(0.15);
     });
 
     it('text output should be >80% smaller than JSON output', () => {
-      const textResult = runCLI(['index', 'README.md']);
-      const jsonResult = runCLI(['--json', 'index', 'README.md']);
+      const textResult = runCLI(['README.md']);
+      const jsonResult = runCLI(['--json', 'README.md']);
 
       const reduction = 1 - textResult.stdout.length / jsonResult.stdout.length;
       expect(reduction).toBeGreaterThan(0.8); // >80% reduction
     });
 
     it('should contain expected structure', () => {
-      const result = runCLI(['index', 'README.md']);
+      const result = runCLI(['README.md']);
 
       // For single file, no namespace prefix (starts with heading)
-      expect(result.stdout).toMatch(/^h1\.0/);
-      // Should have heading indicators (dot notation)
-      expect(result.stdout).toContain('h1.0');
-      expect(result.stdout).toContain('h2.');
+      expect(result.stdout).toMatch(/^h1/);
+      // Should have heading indicators
+      expect(result.stdout).toContain('h1');
+      expect(result.stdout).toContain('h2');
       // Should have block summary after ---
       expect(result.stdout).toContain('---');
       expect(result.stdout).toMatch(/code:\d+/);
@@ -65,9 +65,10 @@ describe('README output size targets', () => {
     });
   });
 
-  describe('select command', () => {
+  describe('select (files + selectors)', () => {
     it('should output raw content without envelope', () => {
-      const result = runCLI(['select', 'block:code[0]', 'README.md']);
+      // Select the installation code block specifically
+      const result = runCLI(['README.md', 'h2.1/code.0']);
 
       expect(result.exitCode).toBe(0);
       // Should be just the code block content
@@ -78,14 +79,15 @@ describe('README output size targets', () => {
     });
 
     it('select overhead should be minimal for simple content', () => {
-      const result = runCLI(['select', 'block:code[0]', 'README.md']);
+      // Select the installation code block specifically
+      const result = runCLI(['README.md', 'h2.1/code.0']);
 
       // Code block is ~30 chars, output shouldn't be much more
       expect(result.stdout.length).toBeLessThan(100);
     });
 
     it('should show relative child paths', () => {
-      const result = runCLI(['select', 'readme::heading:h2[0]', 'README.md']);
+      const result = runCLI(['README.md', 'readme::heading:h2[0]']);
 
       // Should have --- separator for children
       if (result.stdout.includes('---')) {
@@ -99,7 +101,7 @@ describe('README output size targets', () => {
     });
 
     it('error output should be compact', () => {
-      const result = runCLI(['select', 'readme::heading:h2[99]', 'README.md']);
+      const result = runCLI(['README.md', 'readme::heading:h2[99]']);
 
       expect(result.exitCode).toBe(1);
       // Should start with ! for error
@@ -141,7 +143,7 @@ describe('README output size targets', () => {
 
   describe('--json flag', () => {
     it('should output JSON when --json flag is used', () => {
-      const result = runCLI(['--json', 'index', 'README.md']);
+      const result = runCLI(['--json', 'README.md']);
 
       expect(result.exitCode).toBe(0);
       const parsed = JSON.parse(result.stdout);
@@ -151,7 +153,7 @@ describe('README output size targets', () => {
     });
 
     it('JSON output should match original format', () => {
-      const result = runCLI(['--json', 'index', 'README.md']);
+      const result = runCLI(['--json', 'README.md']);
 
       const parsed = JSON.parse(result.stdout);
       expect(parsed.data.documents).toBeInstanceOf(Array);

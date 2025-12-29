@@ -15,7 +15,7 @@ Always update `FORMAT_SPECS` in `src/output/text-formatters.ts` and any relevant
 
 **Select output:**
 - Content only (no children list)
-- Multiple results: `N.` prefix (e.g., `0.`, `1.`)
+- Multiple results: `selector:` prefix (e.g., `heading:h2.0:`, `heading:h2.1:`)
 - Single result: no prefix
 
 **Selectors:**

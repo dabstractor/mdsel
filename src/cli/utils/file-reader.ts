@@ -7,10 +7,12 @@
 /**
  * Check if stdin has piped input.
  *
- * @returns True if stdin is piped (not a TTY)
+ * @returns True if stdin is piped (not a TTY and readable)
  */
 export function isStdinPiped(): boolean {
-  return !process.stdin.isTTY;
+  // isTTY is true for interactive terminals, undefined when stdin is closed/ignored
+  // We only want to read from stdin when it's explicitly piped (isTTY === false)
+  return process.stdin.isTTY === false;
 }
 
 /**
