@@ -4,6 +4,57 @@ Declarative Markdown semantic selection CLI for LLM agents.
 
 mdsel parses Markdown documents into semantic trees and exposes machine-addressable selectors for every meaningful chunk. It enables LLMs to request exactly the content they want—no more, no less—without loading entire files into context.
 
+## Demo
+
+**1. Index a document to see its structure:**
+
+```bash
+$ mdsel README.md
+h1 mdsel
+ h2 Demo
+ h2 Installation
+ h2 Quick Start
+ h2 Commands
+  h3 index
+  h3 select
+ h2 Selectors
+  h3 Syntax
+  h3 Node Types
+  h3 Index Syntax
+  h3 Examples
+  h3 Index Semantics
+ h2 Output Format
+ h2 Error Handling
+ h2 Development
+ h2 License
+---
+code:19 para:23 list:5 table:3
+```
+
+**2. Select specific content by selector:**
+
+```bash
+$ mdsel select h2.1 README.md
+```
+```
+## Installation
+
+​```bash
+npm install -g mdsel
+​```
+
+**Requirements**: Node.js >=18.0.0
+```
+
+**3. Drill into nested content:**
+
+```bash
+$ mdsel select h2.1/code.0 README.md
+```
+```
+npm install -g mdsel
+```
+
 ## Installation
 
 ```bash
