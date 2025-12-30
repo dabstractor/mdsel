@@ -13,6 +13,63 @@ const require = createRequire(import.meta.url);
 const pkg = require('../package.json') as { description: string; version: string };
 
 /**
+ * Split a selector string on commas that separate different selectors.
+ * Commas inside brackets or that are followed by digits (index lists) are not split.
+ *
+ * Examples:
+ * - "h1.0,h2.0" → ["h1.0", "h2.0"] (comma separates selectors)
+ * - "h2.0,2,4" → ["h2.0,2,4"] (comma is part of index list)
+ * - "h2[0,2,4]" → ["h2[0,2,4]"] (comma inside brackets)
+ * - "h1.0,h2.0,2,4,h3.0" → ["h1.0", "h2.0,2,4", "h3.0"]
+ */
+function splitSelectorList(input: string): string[] {
+  // Preserve empty strings as-is (they'll be handled as invalid selectors downstream)
+  if (input === '') {
+    return [''];
+  }
+
+  const selectors: string[] = [];
+  let current = '';
+  let bracketDepth = 0;
+
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+
+    if (char === '[') {
+      bracketDepth++;
+      current += char;
+    } else if (char === ']') {
+      bracketDepth--;
+      current += char;
+    } else if (char === ',' && bracketDepth === 0) {
+      // Check what follows the comma
+      const rest = input.slice(i + 1);
+      const nextNonSpace = rest.trimStart();
+
+      // If next character is a digit, this is an index list continuation
+      if (/^\d/.test(nextNonSpace)) {
+        current += char;
+      } else {
+        // This is a selector separator
+        if (current.trim()) {
+          selectors.push(current.trim());
+        }
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+
+  // Add the last selector
+  if (current.trim()) {
+    selectors.push(current.trim());
+  }
+
+  return selectors;
+}
+
+/**
  * Determine if an argument is a file path or a selector.
  * Files: end with .md/.markdown, or exist on disk
  * Selectors: everything else
@@ -31,6 +88,7 @@ function isFilePath(arg: string): boolean {
 
 /**
  * Partition arguments into files and selectors.
+ * Comma-separated selectors are expanded into multiple selectors.
  */
 function partitionArgs(args: string[]): { files: string[]; selectors: string[] } {
   const files: string[] = [];
@@ -40,7 +98,9 @@ function partitionArgs(args: string[]): { files: string[]; selectors: string[] }
     if (isFilePath(arg)) {
       files.push(arg);
     } else {
-      selectors.push(arg);
+      // Expand comma-separated selectors
+      const expanded = splitSelectorList(arg);
+      selectors.push(...expanded);
     }
   }
 
