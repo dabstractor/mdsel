@@ -1,6 +1,6 @@
 {
   "name": "mdsel",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Declarative Markdown semantic selection CLI for LLM agents",
   "type": "module",
   "bin": {

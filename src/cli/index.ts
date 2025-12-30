@@ -168,4 +168,40 @@ program
     formatCommand(command, options);
   });
 
+// Optional explicit `index` command for backwards compatibility
+program
+  .command('index')
+  .description('Index markdown files (optional - same as just providing files)')
+  .argument('<files...>', 'Markdown files to index')
+  .action(async (files: string[]) => {
+    try {
+      const globalOpts = program.opts<{ json?: boolean }>();
+      await indexCommand(files, { json: globalOpts.json });
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      process.exit(ExitCode.ERROR);
+    }
+  });
+
+// Optional explicit `select` command for backwards compatibility
+program
+  .command('select')
+  .description('Select content from markdown files (optional - same as providing files + selectors)')
+  .argument('<selector>', 'Selector to match')
+  .argument('<files...>', 'Markdown files to search')
+  .action(async (selector: string, files: string[]) => {
+    try {
+      const globalOpts = program.opts<{ json?: boolean }>();
+      const selectors = splitSelectorList(selector);
+      if (selectors.length === 1) {
+        await selectCommand(selectors[0]!, files, { json: globalOpts.json });
+      } else {
+        await selectMultiCommand(selectors, files, { json: globalOpts.json });
+      }
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      process.exit(ExitCode.ERROR);
+    }
+  });
+
 program.parse();
