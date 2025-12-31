@@ -188,6 +188,13 @@ function resolvePathSegments(
       continue;
     }
 
+    // Handle wildcard (*) - returns entire document
+    if (segment.nodeType === 'all') {
+      // The wildcard returns the root node (entire document)
+      currentNodes = currentNodes.map(({ node, path }) => ({ node, path: [...path, node] }));
+      continue;
+    }
+
     // Find matching children for current segment (from first current node)
     const currentNode = currentNodes[0]?.node;
     const currentPath = currentNodes[0]?.path ?? [];
@@ -403,6 +410,10 @@ function segmentToStringWithIndex(segment: PathSegmentNode, index: number): stri
  * Handles both single indices and index arrays.
  */
 function segmentToString(segment: PathSegmentNode): string {
+  // Handle wildcard specially
+  if (segment.nodeType === 'all') {
+    return '*';
+  }
   let segStr = segment.nodeType;
   if (segment.subtype) {
     segStr += `:${segment.subtype}`;

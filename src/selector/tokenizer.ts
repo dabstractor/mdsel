@@ -152,6 +152,10 @@ export function tokenize(input: string): Token[] {
         advance();
         addToken(TokenType.EQUALS, '=', pos);
         continue;
+      case '*':
+        advance();
+        addToken(TokenType.STAR, '*', pos);
+        continue;
       case '"':
       case "'": {
         const strPos = position();

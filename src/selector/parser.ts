@@ -122,12 +122,15 @@ class Parser {
 
   private parsePathSegment(): PathSegmentNode {
     const startPos = this.peek().position;
-    let nodeType: 'root' | 'heading' | 'section' | 'block' | 'page';
+    let nodeType: 'root' | 'heading' | 'section' | 'block' | 'page' | 'all';
     let subtype: HeadingLevel | BlockType | undefined;
     let index: number | undefined;
 
     // Parse node type
-    if (this.match(TokenType.ROOT)) {
+    if (this.match(TokenType.STAR)) {
+      // Wildcard selector - returns entire document
+      nodeType = 'all';
+    } else if (this.match(TokenType.ROOT)) {
       nodeType = 'root';
     } else if (this.match(TokenType.HEADING)) {
       nodeType = 'heading';

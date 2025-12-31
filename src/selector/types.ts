@@ -30,6 +30,7 @@ export enum TokenType {
   STRING = 'STRING',
 
   // Special
+  STAR = 'STAR', // *
   EOF = 'EOF',
   UNKNOWN = 'UNKNOWN',
 }
@@ -92,7 +93,7 @@ export interface SelectorAST extends BaseSelectorNode {
  */
 export interface PathSegmentNode extends BaseSelectorNode {
   type: SelectorNodeType.PATH_SEGMENT;
-  nodeType: 'root' | 'heading' | 'section' | 'block' | 'page';
+  nodeType: 'root' | 'heading' | 'section' | 'block' | 'page' | 'all';
   subtype?: HeadingLevel | BlockType;
   index?: number | number[];
   position: Position;
