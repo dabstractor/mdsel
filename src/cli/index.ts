@@ -111,10 +111,19 @@ const program = new Command();
 
 program
   .name('mdsel')
-  .description(pkg.description)
+  .description(
+    `${pkg.description}
+
+Examples:
+  mdsel README.md              Index document structure
+  mdsel h2.1 README.md         Select second h2 section
+  mdsel h2.0-2 README.md       Select range of sections
+  mdsel "h2.1/code.0" README.md   Select nested content
+  mdsel --json README.md       Output as JSON`
+  )
   .version(pkg.version)
-  .option('--json', 'Output JSON instead of minimal text')
-  .argument('[args...]', 'Files and/or selectors')
+  .option('--json', 'Output JSON instead of text')
+  .argument('[args...]', 'Markdown files and selectors (auto-detected)')
   .action(async (args: string[]) => {
     try {
       const globalOpts = program.opts<{ json?: boolean }>();
@@ -168,10 +177,10 @@ program
     formatCommand(command, options);
   });
 
-// Optional explicit `index` command for backwards compatibility
+// Explicit `index` subcommand (alternative syntax)
 program
   .command('index')
-  .description('Index markdown files (optional - same as just providing files)')
+  .description('Index markdown files (alternative to: mdsel <files>)')
   .argument('<files...>', 'Markdown files to index')
   .action(async (files: string[]) => {
     try {
@@ -183,10 +192,10 @@ program
     }
   });
 
-// Optional explicit `select` command for backwards compatibility
+// Explicit `select` subcommand (alternative syntax)
 program
   .command('select')
-  .description('Select content from markdown files (optional - same as providing files + selectors)')
+  .description('Select content (alternative to: mdsel <selector> <files>)')
   .argument('<selector>', 'Selector to match')
   .argument('<files...>', 'Markdown files to search')
   .action(async (selector: string, files: string[]) => {

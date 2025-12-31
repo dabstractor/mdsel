@@ -10,38 +10,29 @@ mdsel parses Markdown documents into semantic trees and exposes machine-addressa
 
 ```bash
 $ mdsel README.md
-h1 mdsel
- h2 Demo
- h2 Installation
- h2 Quick Start
- h2 Commands
-  h3 index
-  h3 select
- h2 Selectors
-  h3 Syntax
-  h3 Node Types
-  h3 Index Syntax
-  h3 Examples
-  h3 Index Semantics
- h2 Output Format
- h2 Error Handling
- h2 Development
- h2 License
+h1.0 mdsel
+ h2.0 Demo
+ h2.1 Installation
+ h2.2 Quick Start
+ h2.3 Usage
+  h3.0 Index (files only)
+  h3.1 Select (files + selectors)
+ h2.4 Selectors
+ h2.5 Output Format
+ h2.6 Error Handling
+ h2.7 Development
+ h2.8 License
 ---
-code:19 para:23 list:5 table:3
+code:25 para:28 list:4 table:4
 ```
 
 **2. Select specific content by selector:**
 
 ```bash
-$ mdsel README.md h2.1
-```
-```
+$ mdsel h2.1 README.md
 ## Installation
 
-​```bash
 npm install -g mdsel
-​```
 
 **Requirements**: Node.js >=18.0.0
 ```
@@ -49,9 +40,7 @@ npm install -g mdsel
 **3. Drill into nested content:**
 
 ```bash
-$ mdsel README.md h2.1/code.0
-```
-```
+$ mdsel "h2.1/code.0" README.md
 npm install -g mdsel
 ```
 
@@ -66,140 +55,107 @@ npm install -g mdsel
 ## Quick Start
 
 ```bash
-# Index a document to discover available selectors
+# Index a document to see its structure
 mdsel README.md
 
-# Select a specific heading (shorthand)
-mdsel README.md h1.0
+# Select a specific section by index
+mdsel h2.1 README.md
 
-# Select the first code block under a heading
-mdsel README.md "h2.0/code.0"
+# Select a nested element (first code block under second h2)
+mdsel "h2.1/code.0" README.md
 
-# Select multiple headings with comma syntax
-mdsel README.md h2.0,2
+# Select multiple sections at once
+mdsel h2.0 h2.1 README.md
 
-# Select multiple selectors at once
-mdsel README.md h2.0 h2.1 code.0
+# Select a range of sections
+mdsel h2.0-2 README.md
 
-# Limit output to first 10 lines
-mdsel README.md "h2.0?head=10"
+# Select specific indices with comma syntax
+mdsel h2.0,2,4 README.md
 
-# Limit output to last 5 lines
-mdsel README.md "h2.0?tail=5"
+# Limit output to first N lines
+mdsel "h2.0?head=10" README.md
 
-# Use JSON output for programmatic consumption
+# JSON output for programmatic use
 mdsel --json README.md
 ```
 
 ## Usage
 
-mdsel automatically detects whether arguments are files or selectors:
-
 ```bash
-mdsel <files...> [selectors...]
 mdsel [options] <files...> [selectors...]
 ```
 
+Arguments are auto-detected: `.md` files and existing paths are files, everything else is a selector.
+
 **Options**:
 - `--json` - Output JSON instead of text
+- `--help` - Show help
 
 ### Index (files only)
 
-When only files are provided, mdsel outputs the document structure:
+When only files are provided, outputs the document structure:
 
 ```bash
 mdsel README.md
-mdsel README.md docs/API.md
-mdsel --json README.md
 ```
 
-**Text Output** (default):
 ```
 h1.0 mdsel
- h2.0 Installation
- h2.1 Quick Start
- h2.2 Usage
-  h3.0 Index
-  h3.1 Select
+ h2.0 Demo
+ h2.1 Installation
+ h2.2 Quick Start
+ h2.3 Usage
+  h3.0 Index (files only)
+  h3.1 Select (files + selectors)
 ---
-code:19 para:23 list:5 table:3
+code:25 para:28 list:4 table:4
 ```
 
-**JSON Output** (`--json` flag):
-```json
-{
-  "success": true,
-  "command": "index",
-  "timestamp": "2025-01-15T10:30:00.000Z",
-  "data": {
-    "documents": [
-      {
-        "namespace": "readme",
-        "file_path": "README.md",
-        "headings": [...],
-        "blocks": {
-          "paragraphs": 5,
-          "code_blocks": 2,
-          "lists": 1,
-          "tables": 0,
-          "blockquotes": 0
-        }
-      }
-    ],
-    "summary": {
-      "total_documents": 1,
-      "total_nodes": 8,
-      "total_selectors": 8
-    }
-  }
-}
-```
+The index shows:
+- Heading hierarchy with selectors (e.g., `h1.0`, `h2.0`)
+- Indentation reflecting document structure
+- Block counts for code, paragraphs, lists, tables
 
 ### Select (files + selectors)
 
-When both files and selectors are provided, mdsel retrieves matching content:
+When selectors are provided, retrieves matching content:
 
 ```bash
-# Single selector
-mdsel README.md h2.0
-
-# Multiple selectors
-mdsel README.md h2.0 h2.1 code.0
-
-# Cross-document selection
-mdsel README.md GUIDE.md h1.0
-
-# With query parameters
-mdsel README.md "h2.0?head=10"
-
-# Range selection
-mdsel README.md h2.1-3
-
-# Comma list selection
-mdsel README.md h2.0,2,4
+# Single result - content only
+mdsel h2.1 README.md
 ```
 
-**Text Output** (default):
 ```
-## Quick Start
+## Installation
 
-To get started...
+npm install -g mdsel
+
+**Requirements**: Node.js >=18.0.0
 ```
 
-**Multiple Results** (selector prefix):
+```bash
+# Multiple results - prefixed with selector
+mdsel h2.0 h2.1 README.md
+```
+
 ```
 heading:h2.0:
-## Installation
-content...
+## Demo
+...
 heading:h2.1:
-## Quick Start
-content...
+## Installation
+...
 ```
 
-**Error Output**:
+```bash
+# Errors show suggestions
+mdsel h2.99 README.md
+```
+
 ```
 !h2.99
-Index out of range: document has 3 h2 headings
+Index out of range: document has 9 h2 headings
 ~h2.0 ~h2.1 ~h2.2
 ```
 
