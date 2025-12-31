@@ -17,13 +17,14 @@ h1.0 mdsel
  h2.3 Usage
   h3.0 Index (files only)
   h3.1 Select (files + selectors)
+  h3.2 Search (fuzzy matching)
  h2.4 Selectors
  h2.5 Output Format
  h2.6 Error Handling
  h2.7 Development
  h2.8 License
 ---
-code:25 para:28 list:4 table:4
+code:29 para:29 list:5 table:4
 ```
 
 **2. Select specific content by selector:**
@@ -61,6 +62,9 @@ mdsel README.md
 # Select a specific section by index
 mdsel h2.1 README.md
 
+# Select the entire document
+mdsel '*' README.md
+
 # Select a nested element (first code block under second h2)
 mdsel "h2.1/code.0" README.md
 
@@ -70,8 +74,8 @@ mdsel h2.0 h2.1 README.md
 # Select a range of sections
 mdsel h2.0-2 README.md
 
-# Select specific indices with comma syntax
-mdsel h2.0,2,4 README.md
+# Fuzzy search when you don't know the exact selector
+mdsel "installation" README.md
 
 # Limit output to first N lines
 mdsel "h2.0?head=10" README.md
@@ -108,8 +112,9 @@ h1.0 mdsel
  h2.3 Usage
   h3.0 Index (files only)
   h3.1 Select (files + selectors)
+  h3.2 Search (fuzzy matching)
 ---
-code:25 para:28 list:4 table:4
+code:29 para:29 list:5 table:4
 ```
 
 The index shows:
@@ -159,6 +164,26 @@ Index out of range: document has 9 h2 headings
 ~h2.0 ~h2.1 ~h2.2
 ```
 
+### Search (fuzzy matching)
+
+When input doesn't look like a selector, mdsel performs fuzzy search:
+
+```bash
+mdsel "installation" README.md
+```
+
+```
+Search results for "installation":
+
+readme::h2.1 (100% match)
+  Installation
+
+readme::code.9 (74% match)
+  ## Installation npm install -g mdsel ...
+```
+
+Search returns selectors you can use directly to fetch the content.
+
 ## Selectors
 
 Selectors are path-based, ordinal, stateless, and deterministic. They resemble CSS/XPath conceptually but are purpose-built for Markdown.
@@ -179,6 +204,7 @@ Selectors are path-based, ordinal, stateless, and deterministic. They resemble C
 
 | Category | Full Form | Shorthand |
 |----------|-----------|-----------|
+| Wildcard | `*` | `*` |
 | Root | `root` | - |
 | Headings | `heading:h1` ... `heading:h6` | `h1` ... `h6` |
 | Sections | `section` | - |
@@ -204,6 +230,7 @@ Two equivalent notations are supported:
 
 **Basic selection**:
 ```bash
+*                   # Entire document (wildcard)
 root                # Document root
 h1.0                # First h1 heading
 h2.1                # Second h2 heading

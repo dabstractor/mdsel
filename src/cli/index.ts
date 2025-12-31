@@ -115,11 +115,12 @@ program
     `${pkg.description}
 
 Examples:
-  mdsel README.md              Index document structure
-  mdsel h2.1 README.md         Select second h2 section
-  mdsel h2.0-2 README.md       Select range of sections
+  mdsel README.md                 Index document structure
+  mdsel h2.1 README.md            Select second h2 section
+  mdsel '*' README.md             Select entire document
   mdsel "h2.1/code.0" README.md   Select nested content
-  mdsel --json README.md       Output as JSON`
+  mdsel "installation" README.md  Fuzzy search
+  mdsel --json README.md          Output as JSON`
   )
   .version(pkg.version)
   .option('--json', 'Output JSON instead of text')

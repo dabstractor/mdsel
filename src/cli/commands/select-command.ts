@@ -12,7 +12,7 @@ import type { SelectMatch, ChildInfo, ErrorEntry } from '../../output/types.js';
 import type { ResolutionResult } from '../../resolver/types.js';
 import { parseFile, ParserError } from '../../parser/index.js';
 import { parseSelector, SelectorParseError } from '../../selector/index.js';
-import { resolveMulti, type DocumentTree } from '../../resolver/index.js';
+import { resolveMulti, searchMultipleDocuments, type DocumentTree, type SearchResult } from '../../resolver/index.js';
 import { formatSelectResponse, formatErrorResponse, createErrorEntry } from '../../output/index.js';
 import { formatSelectText, formatErrorText } from '../../output/text-formatters.js';
 import { deriveNamespace } from '../utils/namespace.js';
@@ -65,29 +65,46 @@ export async function selectCommand(
     return;
   }
 
-  // Parse selector
+  // Parse selector - if it fails, maybe treat as search query
   let selectorAst: ReturnType<typeof parseSelector>;
+  let parseError: SelectorParseError | null = null;
   try {
     selectorAst = parseSelector(selector);
   } catch (error) {
     if (error instanceof SelectorParseError) {
-      const errorEntry = createErrorEntry(
-        'INVALID_SELECTOR',
-        error.code,
-        error.message,
-        undefined,
-        selector,
-      );
-      outputError([errorEntry], useJson);
-      exitWithCode(ExitCode.ERROR);
+      parseError = error;
+    } else {
+      throw error;
+    }
+  }
+
+  // If selector parsing failed, check if we should search instead
+  if (parseError) {
+    // Only fall back to search if the input looks like a search query
+    // (doesn't contain selector syntax characters that suggest a failed selector)
+    const looksLikeSearch = isLikelySearchQuery(selector);
+
+    if (looksLikeSearch) {
+      await performSearchFallback(selector, files, options);
       return;
     }
-    throw error;
+
+    // Otherwise, report the parse error
+    const errorEntry = createErrorEntry(
+      'INVALID_SELECTOR',
+      parseError.code,
+      parseError.message,
+      undefined,
+      selector,
+    );
+    outputError([errorEntry], useJson);
+    exitWithCode(ExitCode.ERROR);
+    return;
   }
 
   // Parse head/tail query params for truncation
   const truncateOptions: TruncateOptions = {};
-  if (selectorAst.queryParams) {
+  if (selectorAst!.queryParams) {
     for (const param of selectorAst.queryParams) {
       if (param.key === 'head') {
         const value = parseInt(param.value, 10);
@@ -391,4 +408,176 @@ export async function selectMultiCommand(
 
   // Exit with error if any selectors failed
   exitWithCode(allUnresolved.length > 0 ? ExitCode.ERROR : ExitCode.SUCCESS);
+}
+
+/**
+ * Check if the input looks like a search query rather than a failed selector.
+ *
+ * Returns true if the input doesn't contain typical selector syntax characters.
+ */
+function isLikelySearchQuery(input: string): boolean {
+  // If it's empty, it's not a search query
+  if (!input.trim()) {
+    return false;
+  }
+
+  // Selector syntax characters that suggest the user was trying to write a selector
+  // :: (namespace separator)
+  // [ ] (index brackets)
+  // . followed by number (index like h2.0)
+  // : followed by identifier (type specifier like heading:h2)
+
+  // If it has ::, it's a namespace syntax attempt
+  if (input.includes('::')) {
+    return false;
+  }
+
+  // If it has unclosed brackets, it's a syntax error not a search
+  if ((input.includes('[') && !input.includes(']')) ||
+      (!input.includes('[') && input.includes(']'))) {
+    return false;
+  }
+
+  // If it looks like a selector pattern (h1, h2, code, para, etc. followed by . or [)
+  if (/^(h[1-6]|code|para|paragraph|list|table|quote|blockquote|root|section|heading|block)[\.\[]/.test(input)) {
+    return false;
+  }
+
+  // If it's a valid selector keyword with a malformed suffix
+  if (/^(heading|block):/.test(input)) {
+    return false;
+  }
+
+  // Otherwise, treat it as a search query
+  return true;
+}
+
+/**
+ * Perform search when selector parsing fails.
+ *
+ * Treats the input as a search query and finds matching sections.
+ */
+async function performSearchFallback(
+  query: string,
+  files: string[],
+  options: SelectOptions,
+): Promise<void> {
+  const useJson = options.json === true;
+
+  // Parse all files
+  const documents: Array<{ tree: any; namespace: string }> = [];
+  const parseErrors: ErrorEntry[] = [];
+
+  for (const file of files) {
+    try {
+      const result = await parseFile(file);
+      const namespace = deriveNamespace(file);
+      documents.push({
+        namespace,
+        tree: result.ast,
+      });
+    } catch (error) {
+      if (error instanceof ParserError) {
+        parseErrors.push(
+          createErrorEntry(
+            error.code as 'FILE_NOT_FOUND' | 'PARSE_ERROR',
+            error.code,
+            error.message,
+            error.filePath,
+          ),
+        );
+      } else if (error instanceof Error) {
+        parseErrors.push(createErrorEntry('PROCESSING_ERROR', 'UNKNOWN', error.message, file));
+      }
+    }
+  }
+
+  // If no documents could be parsed, return error
+  if (documents.length === 0) {
+    outputError(parseErrors, useJson);
+    exitWithCode(ExitCode.ERROR);
+    return;
+  }
+
+  // Perform fuzzy search
+  const searchResults = searchMultipleDocuments(documents, query, {
+    maxResults: 10,
+    minScore: 0.3,
+  });
+
+  if (searchResults.length === 0) {
+    // No search results found
+    const unresolved = [
+      {
+        selector: query,
+        reason: `No matches found for search query "${query}"`,
+        suggestions: [],
+      },
+    ];
+    if (useJson) {
+      const response = formatSelectResponse([], unresolved);
+      console.log(JSON.stringify(response));
+    } else {
+      console.log(formatSearchText(query, []));
+    }
+    exitWithCode(ExitCode.ERROR);
+    return;
+  }
+
+  // Format and output search results
+  if (useJson) {
+    const matches = formatSearchResultsAsMatches(searchResults);
+    const response = {
+      success: true,
+      command: 'search',
+      query,
+      timestamp: new Date().toISOString(),
+      data: {
+        matches,
+        unresolved: [],
+      },
+    };
+    console.log(JSON.stringify(response));
+  } else {
+    console.log(formatSearchText(query, searchResults));
+  }
+
+  exitWithCode(ExitCode.SUCCESS);
+}
+
+/**
+ * Format search results as SelectMatch objects for JSON output.
+ */
+function formatSearchResultsAsMatches(results: SearchResult[]): SelectMatch[] {
+  return results.map((result) => ({
+    selector: result.selector,
+    type: result.type,
+    content: result.content,
+    truncated: false,
+    children_available: [],
+    search_score: result.score,
+    match_type: result.matchType,
+  }));
+}
+
+/**
+ * Format search results as text output.
+ */
+function formatSearchText(query: string, results: SearchResult[]): string {
+  if (results.length === 0) {
+    return `No matches found for: ${query}`;
+  }
+
+  const parts: string[] = [];
+  parts.push(`Search results for "${query}":`);
+  parts.push('');
+
+  for (const result of results) {
+    const score = Math.round(result.score * 100);
+    parts.push(`${result.selector} (${score}% match)`);
+    parts.push(`  ${result.preview}`);
+    parts.push('');
+  }
+
+  return parts.join('\n').trimEnd();
 }

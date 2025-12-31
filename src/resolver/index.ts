@@ -10,6 +10,14 @@ export { SuggestionEngine, type SuggestionOptions } from './suggestions.js';
 // Levenshtein distance
 export { levenshteinDistance } from './levenshtein.js';
 
+// Search functions
+export {
+  searchDocument,
+  searchMultipleDocuments,
+  type SearchResult,
+  type SearchOptions,
+} from './search.js';
+
 // Type exports
 export type {
   ResolutionResult,
