@@ -233,12 +233,14 @@ function formatMatches(results: ResolutionResult[], truncateOpts: TruncateOption
     const { content, truncated } = truncateContent(extractMarkdown(node), truncateOpts);
 
     // Build children_available list - only include selectable block types
+    // Use the (possibly truncated) node to reflect the actual returned content
     const childrenAvailable: ChildInfo[] = [];
-    if (result.childrenAvailable && node.children) {
+    const nodeAny = node as any;
+    if (nodeAny.children && Array.isArray(nodeAny.children)) {
       // Track counts per type for indexing
       const typeCounts: Record<string, number> = {};
 
-      for (const child of node.children) {
+      for (const child of nodeAny.children) {
         const childType = String(child.type);
 
         // Check if it's a heading
