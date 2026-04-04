@@ -24,4 +24,4 @@ Always update `FORMAT_SPECS` in `src/output/text-formatters.ts` and any relevant
 - Range: `h2.1-3` or `h2[1-3]` → h2.1, h2.2, h2.3
 - Comma list: `h2.0,2,4` or `h2[0,2,4]` → h2.0, h2.2, h2.4
 - No index = all matches (e.g., `h2` returns all h2 sections)
-- Query params: `?head=N` (first N lines), `?tail=N` (last N lines)
+- Query params: `?head=N` (first N lines), `?tail=N` (last N lines), `?until=<selector>` (stop before first matching child)

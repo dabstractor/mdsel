@@ -169,7 +169,7 @@ export const FORMAT_SPECS = {
 code:19 para:23 list:5 table:3`,
   },
   select: {
-    terse: 'content only. multiple: selector: prefix. no index = all',
+    terse: 'content only. multiple: selector: prefix. no index = all. ?until= stops before selector',
     example: `h2.0:
 ## Installation
 content...
