@@ -326,6 +326,11 @@ class Parser {
       value = this.advance().value;
     } else if (this.check(TokenType.IDENTIFIER)) {
       value = this.advance().value;
+      // Handle optional .N index suffix for values like h2.1, code.0
+      if (this.check(TokenType.DOT) && this.peekType(1) === TokenType.NUMBER) {
+        this.advance(); // consume DOT
+        value += '.' + this.advance().value; // append .N
+      }
     } else if (this.check(TokenType.NUMBER)) {
       value = this.advance().value;
     } else {
@@ -353,6 +358,11 @@ class Parser {
         paramValue = this.advance().value;
       } else if (this.check(TokenType.IDENTIFIER)) {
         paramValue = this.advance().value;
+        // Handle optional .N index suffix for values like h2.1, code.0
+        if (this.check(TokenType.DOT) && this.peekType(1) === TokenType.NUMBER) {
+          this.advance(); // consume DOT
+          paramValue += '.' + this.advance().value; // append .N
+        }
       } else if (this.check(TokenType.NUMBER)) {
         paramValue = this.advance().value;
       } else {

@@ -270,6 +270,10 @@ code.0,2            # 1st and 3rd code blocks
 h2.0?head=10        # First 10 lines of content
 h2.0?tail=5         # Last 5 lines of content
 section.2?head=20   # First 20 lines of section
+h1.0?until=h2       # Stop before the first h2 child
+h1.0?until=h2.1     # Stop before the second h2 child (index 1)
+h2.0?until=code     # Stop before the first code block
+h1.0?until=h2&head=20  # Combine until with head truncation
 ```
 
 **Cross-document selection**:
@@ -327,7 +331,7 @@ interface SelectResponse {
 
 ### Truncation
 
-By default, full content is returned. Use `?head=N` or `?tail=N` query parameters to limit output to the first or last N lines. Truncated content includes a `[truncated]` marker.
+By default, full content is returned. Use `?head=N` or `?tail=N` query parameters to limit output to the first or last N lines. Use `?until=<selector>` to stop before the first child node matching the given selector (e.g., `?until=h2` stops before the first `## ` subsection). Truncated content includes a `[truncated]` marker.
 
 ## Error Handling
 
