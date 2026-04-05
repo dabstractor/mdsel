@@ -144,6 +144,124 @@ export interface TruncateOptions {
 }
 
 /**
+ * Specification for `?until=` AST-level truncation.
+ *
+ * Describes the node type and optional 0-based index at which to stop.
+ */
+export interface UntilSpec {
+  /** The category of node to match against */
+  nodeType: 'heading' | 'block';
+  /** Heading level (h1-h6) or mdast block type (code, paragraph, etc.) */
+  subtype: string;
+  /** 0-based occurrence index. When undefined, stop at the first match. */
+  index?: number;
+}
+
+/** Map from shorthand until-value to mdast node type */
+const BLOCK_UNTIL_MAP: Record<string, string> = {
+  para: 'paragraph',
+  paragraph: 'paragraph',
+  code: 'code',
+  list: 'list',
+  table: 'table',
+  quote: 'blockquote',
+  blockquote: 'blockquote',
+};
+
+/**
+ * Parse an `until` query-param value string into an `UntilSpec`.
+ *
+ * Accepts shorthand like `h2`, `h2.1`, `code`, `code.0`, `table`, etc.
+ * Returns `null` if the value is empty or unrecognised.
+ *
+ * @example
+ * parseUntilSpec('h2')      // { nodeType: 'heading', subtype: 'h2' }
+ * parseUntilSpec('h2.1')    // { nodeType: 'heading', subtype: 'h2', index: 1 }
+ * parseUntilSpec('code.0')  // { nodeType: 'block', subtype: 'code', index: 0 }
+ */
+export function parseUntilSpec(value: string): UntilSpec | null {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  // Match <type> optionally followed by .<index>
+  const re = /^(h[1-6]|code|para(?:graph)?|list|table|quote|blockquote)(?:\.(\d+))?$/;
+  const match = re.exec(trimmed);
+  if (!match) return null;
+
+  const typeStr = match[1] ?? '';
+  const indexStr = match[2];
+  const index = indexStr !== undefined ? parseInt(indexStr, 10) : undefined;
+
+  if (/^h[1-6]$/.test(typeStr)) {
+    return { nodeType: 'heading', subtype: typeStr, index };
+  }
+
+  const mdastType = BLOCK_UNTIL_MAP[typeStr];
+  if (!mdastType) return null;
+  return { nodeType: 'block', subtype: mdastType, index };
+}
+
+/**
+ * Apply `until` truncation to a node's children at the AST level.
+ *
+ * Walks the node's children and returns a new node whose children are
+ * sliced just before the first child that matches `untilSpec` (taking
+ * the optional index into account).  If the spec matches nothing the
+ * original node is returned unchanged.
+ *
+ * @param node - The node whose children to potentially truncate
+ * @param untilSpec - The parsed until specification
+ * @returns The (possibly modified) node and whether truncation occurred
+ */
+export function applyUntilTruncation(
+  node: ContentNode | SectionNode,
+  untilSpec: UntilSpec,
+): { node: ContentNode | SectionNode; truncated: boolean } {
+  if (!('children' in node) || !Array.isArray((node as { children?: unknown }).children)) {
+    return { node, truncated: false };
+  }
+
+  const children = (node as { children: unknown[] }).children;
+  let typeCount = 0;
+
+  for (let i = 0; i < children.length; i++) {
+    const child = children[i];
+
+    if (matchesUntilSpec(child, untilSpec)) {
+      if (untilSpec.index === undefined || typeCount === untilSpec.index) {
+        // Truncate here – exclude this child and everything after it
+        const truncatedChildren = children.slice(0, i);
+        return {
+          node: { ...(node as object), children: truncatedChildren } as ContentNode | SectionNode,
+          truncated: true,
+        };
+      }
+      typeCount++;
+    }
+  }
+
+  return { node, truncated: false };
+}
+
+/**
+ * Check whether an mdast child node matches an `UntilSpec`.
+ */
+function matchesUntilSpec(child: unknown, spec: UntilSpec): boolean {
+  if (typeof child !== 'object' || child === null || !('type' in child)) {
+    return false;
+  }
+  const c = child as { type: string; depth?: number };
+
+  if (spec.nodeType === 'heading') {
+    const depth = parseInt(spec.subtype.slice(1), 10);
+    return c.type === 'heading' && c.depth === depth;
+  }
+
+  // block
+  return c.type === spec.subtype;
+}
+
+/**
  * Truncate content by line count.
  *
  * By default returns full content. Use head or tail to limit output.

@@ -17,7 +17,7 @@ import { formatSelectResponse, formatErrorResponse, createErrorEntry } from '../
 import { formatSelectText, formatErrorText } from '../../output/text-formatters.js';
 import { deriveNamespace } from '../utils/namespace.js';
 import { buildAvailableSelectors } from '../utils/selector-builder.js';
-import { extractMarkdown, truncateContent, type TruncateOptions } from '../utils/content-extractor.js';
+import { extractMarkdown, truncateContent, applyUntilTruncation, parseUntilSpec, type TruncateOptions, type UntilSpec } from '../utils/content-extractor.js';
 import { ExitCode, exitWithCode } from '../utils/exit-codes.js';
 
 /**
@@ -102,8 +102,9 @@ export async function selectCommand(
     return;
   }
 
-  // Parse head/tail query params for truncation
+  // Parse head/tail/until query params for truncation
   const truncateOptions: TruncateOptions = {};
+  let untilSpec: UntilSpec | undefined;
   if (selectorAst!.queryParams) {
     for (const param of selectorAst.queryParams) {
       if (param.key === 'head') {
@@ -116,6 +117,8 @@ export async function selectCommand(
         if (!isNaN(value) && value > 0) {
           truncateOptions.tail = value;
         }
+      } else if (param.key === 'until') {
+        untilSpec = parseUntilSpec(param.value) ?? undefined;
       }
     }
   }
@@ -162,7 +165,7 @@ export async function selectCommand(
 
   // Format response based on outcome
   if (outcome.success) {
-    const matches = formatMatches(outcome.results, truncateOptions);
+    const matches = formatMatches(outcome.results, truncateOptions, untilSpec);
     if (useJson) {
       const response = formatSelectResponse(matches, []);
       console.log(JSON.stringify(response));
@@ -216,17 +219,28 @@ const SELECTABLE_BLOCKS: Record<string, string> = {
 /**
  * Format resolution results into SelectMatch objects.
  */
-function formatMatches(results: ResolutionResult[], truncateOpts: TruncateOptions): SelectMatch[] {
+function formatMatches(results: ResolutionResult[], truncateOpts: TruncateOptions, untilSpec?: UntilSpec): SelectMatch[] {
   return results.map((result) => {
-    const { content, truncated } = truncateContent(extractMarkdown(result.node), truncateOpts);
+    // Apply AST-level until truncation before markdown serialization
+    let node = result.node;
+    let untilTruncated = false;
+    if (untilSpec) {
+      const applied = applyUntilTruncation(node, untilSpec);
+      node = applied.node;
+      untilTruncated = applied.truncated;
+    }
+
+    const { content, truncated } = truncateContent(extractMarkdown(node), truncateOpts);
 
     // Build children_available list - only include selectable block types
+    // Use the (possibly truncated) node to reflect the actual returned content
     const childrenAvailable: ChildInfo[] = [];
-    if (result.childrenAvailable && result.node.children) {
+    const nodeAny = node as any;
+    if (nodeAny.children && Array.isArray(nodeAny.children)) {
       // Track counts per type for indexing
       const typeCounts: Record<string, number> = {};
 
-      for (const child of result.node.children) {
+      for (const child of nodeAny.children) {
         const childType = String(child.type);
 
         // Check if it's a heading
@@ -265,7 +279,7 @@ function formatMatches(results: ResolutionResult[], truncateOpts: TruncateOption
       selector: String(result.selector),
       type: String(result.node.type),
       content,
-      truncated,
+      truncated: untilTruncated || truncated,
       children_available: childrenAvailable,
     };
   });
@@ -364,8 +378,9 @@ export async function selectMultiCommand(
       throw error;
     }
 
-    // Parse head/tail query params for truncation
+    // Parse head/tail/until query params for truncation
     const truncateOptions: TruncateOptions = {};
+    let untilSpec: UntilSpec | undefined;
     if (selectorAst.queryParams) {
       for (const param of selectorAst.queryParams) {
         if (param.key === 'head') {
@@ -378,6 +393,8 @@ export async function selectMultiCommand(
           if (!isNaN(value) && value > 0) {
             truncateOptions.tail = value;
           }
+        } else if (param.key === 'until') {
+          untilSpec = parseUntilSpec(param.value) ?? undefined;
         }
       }
     }
@@ -386,7 +403,7 @@ export async function selectMultiCommand(
     const outcome = resolveMulti(documents, selectorAst);
 
     if (outcome.success) {
-      const matches = formatMatches(outcome.results, truncateOptions);
+      const matches = formatMatches(outcome.results, truncateOptions, untilSpec);
       allMatches.push(...matches);
     } else {
       const err = outcome.error;
